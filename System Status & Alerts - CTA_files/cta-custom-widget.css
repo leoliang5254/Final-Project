@@ -1,0 +1,29 @@
+.compatible-msg-container{
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    height: 32px;
+    background-color: #0166ce;
+    border-radius: 4px;
+    box-shadow: 1px 1px 15px 3px #888888;
+    padding: 9px;
+    margin-right: 5px;
+    top: 20px;
+    right: 20px;
+}
+.compatible-msg-container .compatible-msg{
+    padding-right: 15px;
+}
+.compatible-msg-container .close-btn-container{
+    display: block;
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    cursor: pointer;
+}
+.compatible-msg-container .close-btn-container #close-btn{
+    width: 12px;
+}

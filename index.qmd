@@ -1,0 +1,409 @@
+---
+title: "Final Project"
+---
+
+## 1. Transit access and equity
+
+How equitable is CTA transit service reliability across Chicago neighborhoods, and which areas experience the longest wait times or lowest service frequency?
+
+## 2. Data Acquisition
+
+To obtain rail system alert data from the Chicago Transit Authority (CTA), I used a web scraping approach. The CTA publishes system status and alerts on its website, but the site blocks automated web requests from R. Because of this, direct scraping from the live URL was not possible.
+
+To preserve the web scraping method while avoiding server restrictions, I downloaded the full HTML of the CTA System Status & Alerts page using a standard web browser. I then used the rvest package in R to parse and extract structured rail alert information directly from the saved HTML file. This method still demonstrates the core principles of web scraping: navigating HTML structure, selecting elements with CSS selectors, and transforming the extracted content into a usable dataset.
+
+Web scrapping
+
+```{r}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(rvest)
+})
+
+html <- read_html("System Status & Alerts - CTA.html")
+
+rail_block <- html |>
+  html_element("div#aRailAlerts table.tblsysalrt") |>
+  html_elements("tr")
+
+rail_rows <- rail_block[-1]
+
+route <- rail_rows |>
+  html_element("td:nth-child(1) a") |>
+  html_text2()
+
+route_url <- rail_rows |>
+  html_element("td:nth-child(1) a") |>
+  html_attr("href")
+
+status <- rail_rows |>
+  html_element("td:nth-child(2)") |>
+  html_text2()
+
+rail_alerts <- tibble(
+  mode = "rail",
+  route,
+  route_url,
+  status
+)
+
+rail_alerts
+```
+
+The scraped dataset will serve as the foundation for subsequent steps, including data cleaning, visualization, and the analysis of how rail conditions vary across Chicago’s neighborhoods and populations.
+
+## 3. Data Wrangling and Quality Evaluation
+
+After scraping the rail alerts from the CTA System Status & Alerts page, I performed a series of wrangling steps to prepare the data set for analysis. The raw scraped data included the rail line name, a hyperlink to CTA’s route page, and a status description for each rail line. Although the data set is relatively small, it still required cleaning and structuring to ensure consistency and analytical usefulness.
+
+First, I standardized variable names, trimmed whitespace, and removed any non-informative rows. I then extracted key components of the service status, such as distinguishing between “Normal Service,” “Minor Delays,” and other operational statuses. Standardizing these values enables more reliable grouping and comparison across rail lines.
+
+Next, I evaluated data quality issues that commonly arise in scraped data. These included inconsistent status wording across lines, potential missing values, and whether the hyperlink fields were complete. Although the CTA’s website provides a structured table, the text content is not fully standardized, so additional transformation was needed to categorize alerts into meaningful groups.
+
+From an equity and fairness perspective, it was important to assess whether the data was complete and representative of the full CTA rail network. I checked whether all major rail lines appeared in the data set and whether any had missing or ambiguous service status fields. Missing values or incomplete alerts could bias subsequent analysis of transit reliability. These checks help ensure that the data set is suitable for exploring how service quality may differ across communities served by different rail lines.
+
+The cleaned data set resulting from this step provides a structured, consistent input for visualization and analysis in later sections.
+
+3.1 Cleaning and Standardizing Variables
+
+```{r}
+library(tidyverse)
+
+rail_clean <- rail_alerts |>
+  mutate(
+    route = str_squish(route),
+    status = str_squish(status),
+    route_url = str_squish(route_url)
+  )
+rail_clean
+```
+
+3.2 Creating a Standardized Status Category
+
+```{r}
+rail_clean <- rail_clean |>
+mutate(
+status_lower = str_to_lower(status),
+status_cat = case_when(
+  str_detect(status_lower, "normal") ~ "normal",
+  str_detect(status_lower, "minor") ~ "minor_delay",
+  str_detect(status_lower, "delay") ~ "major_delay",
+  str_detect(status_lower, "reroute|slow zone|work") ~ "service_change",
+  TRUE ~ "unknown"
+  )
+)
+
+rail_clean
+```
+
+3.3 Checking for Missing or Inconsistent Data
+
+```{r}
+# Missing values across each variable
+
+rail_clean |> summarise(across(everything(), ~sum(is.na(.))))
+
+```
+
+```{r}
+# Raw status text overview
+
+rail_clean |> count(status, sort = TRUE)
+
+```
+
+```{r}
+# Standardized category counts
+
+rail_clean |> count(status_cat, sort = TRUE)
+
+```
+
+3.4 Checking for Missing Rail Lines
+
+```{r}
+expected_lines <- c(
+"Red Line","Blue Line","Brown Line","Green Line","Orange Line",
+"Purple Line","Purple Line Express","Pink Line","Yellow Line"
+)
+
+missing_lines <- setdiff(expected_lines, rail_clean$route)
+missing_lines
+```
+
+3.5 Structural Summary of the Cleaned Data set
+
+```{r}
+glimpse(rail_clean)
+
+```
+
+3.6 Fairness and Data Quality Considerations
+
+Several equity and quality issues emerged during the wrangling process:
+
+-   **Missing Lines:** Not all rail lines appear in the scraped table. This may reflect real conditions (e.g., a line experiencing no service alerts), but it still introduces the possibility of missing data that affects representativeness.
+
+-   **Status Description Variability:** CTA uses inconsistent wording for service conditions. The decisions made during standardization may influence downstream comparisons, and these transformations introduce subjective interpretation.
+
+-    **Snapshot Bias:** The scraped HTML represents a single moment in time rather than a historical data set. Service reliability varies by time of day and day of week, so this snapshot may not fully represent overall performance.
+
+-    **Equity Relevance:** If certain lines—especially those serving predominantly low-income or marginalized neighborhoods—show more frequent or more severe alerts, these patterns must be interpreted carefully. Data limitations and website structure constrain the conclusions that can be drawn.
+
+Overall, the data set is clean and structured enough to support exploratory visualization and analytically work in subsequent sections, but the limitations above should be considered when interpreting results.
+
+## 4. Reproducible Reporting
+
+This section presents reproducible visualizations summarizing the current status of CTA rail service based on the cleaned data set prepared in Step 3. Using Quarto allows narrative text, code, and output to be combined in a single document, ensuring transparency and full reproducibility.
+
+The visualizations below explore how service conditions vary across rail lines, how standardized status categories are distributed, and how frequently each line appears in the system alerts. Finally, I include an interactive figure that allows users to hover over rail lines for more detail. All plots update automatically whenever the underlying data set changes.
+
+4.1 Visualization 1: Rail Line by Status Category
+
+This bar chart summarizes the standardized status categories for each rail line. It provides a quick comparison of service conditions across the network.
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+rail_clean |>
+ggplot(aes(x = route, fill = status_cat)) +
+geom_bar() +
+labs(
+title = "Count of Service Status Categories by CTA Rail Line",
+x = "Rail Line",
+y = "Number of Alerts",
+fill = "Status Category"
+) +
+theme_minimal() +
+theme(
+axis.text.x = element_text(angle = 45, hjust = 1)
+)
+```
+
+4.2 Visualization 2: Frequency of Raw Status Text
+
+This chart shows the exact status phrases scraped from the CTA website, highlighting variation in the text descriptions used for different lines.
+
+```{r}
+rail_clean |>
+count(status, sort = TRUE) |>
+ggplot(aes(x = reorder(status, n), y = n)) +
+geom_col(fill = "#2C7BB6") +
+coord_flip() +
+labs(
+title = "Frequency of Rail Service Status Phrases",
+x = "Status Text",
+y = "Count"
+) +
+theme_minimal()
+```
+
+4.3 Visualization 3: Rail Lines Appearing in Alerts
+
+This chart helps identify rail lines that may be missing, overrepresented, or behaving differently in terms of alert frequency.
+
+```{r}
+rail_clean |>
+count(route, sort = TRUE) |>
+ggplot(aes(x = reorder(route, n), y = n)) +
+geom_col(fill = "#FDAE61") +
+coord_flip() +
+labs(
+title = "Frequency of CTA Rail Lines Appearing in System Alerts",
+x = "Rail Line",
+y = "Count"
+) +
+theme_minimal()
+
+```
+
+4.4 Interactive Visualization
+
+This interactive bar chart uses **plotly**, allowing the user to hover over rail lines for details. Interactive components satisfy the Quarto project requirement.
+
+```{r}
+suppressPackageStartupMessages({
+  library(plotly)})
+
+
+fig <- rail_clean |>
+count(route, status_cat) |>
+plot_ly(
+x = ~route,
+y = ~n,
+color = ~status_cat,
+type = "bar",
+hoverinfo = "text",
+text = ~paste("Route:", route,
+"<br>Status Category:", status_cat,
+"<br>Count:", n)
+)
+
+fig <- fig |>
+layout(
+title = "Interactive CTA Rail Status Summary",
+xaxis = list(title = "Rail Line"),
+yaxis = list(title = "Count")
+)
+
+fig
+```
+
+4.5 Reproducibility Notes
+
+-    All visualizations update automatically when the data set changes.
+
+-    The code blocks can be rerun at any time to regenerate charts.
+
+-    Using Quarto ensures transparency and allows readers to inspect the full analysis pipeline.
+
+-    The interactive figure adds user-friendly exploration and supports policymaking audiences who may prefer visual summaries.
+
+## 5. Advanced Analysis: Clustering Rail Lines Using Machine Learning
+
+For the advanced analysis component, I applied a machine learning method to group CTA rail lines based on their service conditions. Because the data set is relatively small and primarily categorical, I used unsupervised clustering (k-means) to identify patterns across lines using features derived from the standardized service status categories.
+
+The main idea is to summarize, for each rail line, how many alerts fall into each status category (e.g., normal, minor delay, major delay, service change). These features form a simple numeric profile of the service conditions for each line. K-means clustering is then used to group lines with similar profiles. This approach does not rely on labeled outcome data and is appropriate for exploratory analysis of service patterns.
+
+5.1 Creating Feature Vectors for Each Rail Line
+
+First, I created a summary data set with counts of alerts by status category for each rail line. These counts are used as features for clustering.
+
+```{r}
+library(tidyverse)
+
+rail_features <- rail_clean |>
+count(route, status_cat) |>
+tidyr::pivot_wider(
+names_from = status_cat,
+values_from = n,
+values_fill = 0
+)
+
+rail_features
+```
+
+This produces a table where each row is a rail line and each column is the count of alerts in a particular category
+
+5.2 Running K-Means Clustering
+
+Because k-means requires the number of clusters to be no greater than the number of distinct feature profiles, I set the number of clusters to:
+
+**min(3, number of distinct feature patterns)**
+
+This prevents errors and ensures meaningful clusters.
+
+```{r}
+feature_matrix <- rail_features |>
+select(-route) |>
+as.matrix()
+
+n_distinct <- feature_matrix |>
+as.data.frame() |>
+distinct() |>
+nrow()
+
+n_distinct
+```
+
+```{r}
+n_clusters <- min(3, n_distinct)
+
+n_clusters
+```
+
+```{r}
+if (n_clusters > 1) {
+set.seed(446)
+
+k_result <- kmeans(feature_matrix, centers = n_clusters)
+
+k_result
+
+rail_clusters <- rail_features |>
+mutate(cluster = k_result$cluster)
+
+} else {
+rail_clusters <- rail_features |>
+mutate(cluster = 1)
+}
+
+rail_clusters
+```
+
+5.3 Merging Cluster Labels Into the Cleaned Dataset
+
+```{r}
+rail_clustered <- rail_clean |>
+left_join(
+rail_clusters |> select(route, cluster),
+by = "route"
+)
+
+rail_clustered
+
+```
+
+Because the data set is small and some rail lines share identical status profiles, I set the number of clusters equal to the smaller of three and the number of distinct feature profiles to avoid specifying more clusters than unique data points.
+
+5.4 Visualizing Cluster Results
+
+Plot 1: Rail Lines by Cluster
+
+```{r}
+rail_clusters |>
+ggplot(aes(x = reorder(route, cluster), y = as.factor(cluster))) +
+geom_point(size = 4) +
+labs(
+title = "K-Means Clusters of CTA Rail Lines",
+x = "Rail Line",
+y = "Cluster"
+) +
+theme_minimal() +
+theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Plot 2: Status Distribution Within Each Cluster
+
+This plot compares how different clusters are composed in terms of service status categories.
+
+```{r}
+rail_clustered |>
+count(cluster, status_cat) |>
+ggplot(aes(x = status_cat, y = n, fill = as.factor(cluster))) +
+geom_col(position = "dodge") +
+labs(
+title = "Distribution of Status Categories by Cluster",
+x = "Service Status Category",
+y = "Count",
+fill = "Cluster"
+) +
+theme_minimal()
+```
+
+5.5 Interpretation of Machine Learning Results
+
+-    The k-means algorithm grouped rail lines based on how many alerts they had in each status category.
+
+-    Lines with similar operational patterns appear in the same cluster.
+
+-    Some clusters may reflect lines experiencing primarily normal service, while others may reflect lines with more construction-related disruptions or operational delays.
+
+-    Because the data set is a snapshot, clusters suggest *short-term* operational similarities, not long-term reliability trends.
+
+5.6 Fairness and Limitations
+
+-    **Snapshot bias:** The analysis reflects conditions only for the moment the HTML was scraped, not long-term performance.
+
+-    **Small data set:** With limited alerts and a small number of rail lines, clusters should be interpreted cautiously.
+
+-    **Reporting bias:** CTA’s website communicates certain alerts differently across lines. Differences in reporting may influence clusters.
+
+-    **Equity implications:** Lines serving marginalized communities could appear more frequently in “disrupted” clusters—however, drawing these conclusions responsibly requires historical and demographic data that is beyond the scraped data set.
+
+Despite these limitations, the machine learning approach offers a structured way to compare service conditions across rail lines using reproducible, data-driven methods.
+
+## 6. Github intergretion
+
+## 7.

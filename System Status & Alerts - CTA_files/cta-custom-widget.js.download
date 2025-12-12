@@ -1,0 +1,3498 @@
+'use strict';
+var storageUrl;
+
+const inactivityTime = 7200000; //session Timesout after 2 hrs
+let lastInteractionTimestamp = Date.now();
+var languages;
+var chipsDisbaled;
+var expandValue;
+let chatApiInProgressFlag = false;
+const intialLangValue = document.documentElement.lang || 'en';
+function _instanceof(left, right) {
+	if (
+		//Symbol can either be a string or undefined
+		right != null &&
+		typeof Symbol !== 'undefined' &&
+		right[Symbol.hasInstance]
+	) {
+		return !!right[Symbol.hasInstance](left);
+	} else {
+		return left instanceof right;
+	}
+}
+function _typeof(obj) {
+	'@babel/helpers - typeof';
+	if (typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol') {
+		_typeof = function _typeof(obj) {
+			return typeof obj;
+		};
+	} else {
+		_typeof = function _typeof(obj) {
+			return obj &&
+				typeof Symbol === 'function' &&
+				obj.constructor === Symbol &&
+				obj !== Symbol.prototype
+				? 'symbol'
+				: typeof obj;
+		};
+	}
+	return _typeof(obj);
+}
+
+function _classCallCheck(instance, Constructor) {
+	if (!_instanceof(instance, Constructor)) {
+		throw new TypeError('Cannot call a class as a function');
+	}
+}
+
+function _defineProperties(target, props) {
+	for (var i = 0; i < props.length; i++) {
+		var descriptor = props[i];
+		descriptor.enumerable = descriptor.enumerable || false;
+		descriptor.configurable = true;
+		if ('value' in descriptor) descriptor.writable = true;
+		Object.defineProperty(target, descriptor.key, descriptor);
+	}
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+	if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+	if (staticProps) _defineProperties(Constructor, staticProps);
+	return Constructor;
+}
+
+function _inherits(subClass, superClass) {
+	if (typeof superClass !== 'function' && superClass !== null) {
+		throw new TypeError('Super expression must either be null or a function');
+	}
+	subClass.prototype = Object.create(superClass && superClass.prototype, {
+		constructor: { value: subClass, writable: true, configurable: true }
+	});
+	if (superClass) _setPrototypeOf(subClass, superClass);
+}
+
+function _createSuper(Derived) {
+	var hasNativeReflectConstruct = _isNativeReflectConstruct();
+	return function _createSuperInternal() {
+		var Super = _getPrototypeOf(Derived);
+		var result;
+		if (hasNativeReflectConstruct) {
+			var NewTarget = _getPrototypeOf(this).constructor;
+			result = Reflect.construct(Super, arguments, NewTarget);
+		} else {
+			result = Super.apply(this, arguments);
+		}
+		return _possibleConstructorReturn(this, result);
+	};
+}
+
+function _possibleConstructorReturn(self, call) {
+	if (call && (_typeof(call) === 'object' || typeof call === 'function')) {
+		return call;
+	}
+	return _assertThisInitialized(self);
+}
+
+function _assertThisInitialized(self) {
+	if (self === void 0) {
+		throw new ReferenceError(
+			"this hasn't been initialised - super() hasn't been called"
+		);
+	}
+	return self;
+}
+
+function _wrapNativeSuper(Class) {
+	var _cache = typeof Map === 'function' ? new Map() : undefined;
+	_wrapNativeSuper = function _wrapNativeSuper(Class) {
+		if (Class === null || !_isNativeFunction(Class)) return Class;
+		if (typeof Class !== 'function') {
+			throw new TypeError('Super expression must either be null or a function');
+		}
+		if (typeof _cache !== 'undefined') {
+			if (_cache.has(Class)) return _cache.get(Class);
+			_cache.set(Class, Wrapper);
+		}
+		function Wrapper() {
+			return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+		}
+		Wrapper.prototype = Object.create(Class.prototype, {
+			constructor: {
+				value: Wrapper,
+				enumerable: false,
+				writable: true,
+				configurable: true
+			}
+		});
+		return _setPrototypeOf(Wrapper, Class);
+	};
+	return _wrapNativeSuper(Class);
+}
+
+function _construct(Parent, args, Class) {
+	if (_isNativeReflectConstruct()) {
+		_construct = Reflect.construct;
+	} else {
+		_construct = function _construct(Parent, args, Class) {
+			var a = [null];
+			a.push.apply(a, args);
+			var Constructor = Function.bind.apply(Parent, a);
+			var instance = new Constructor();
+			if (Class) _setPrototypeOf(instance, Class.prototype);
+			return instance;
+		};
+	}
+	return _construct.apply(null, arguments);
+}
+
+function _isNativeReflectConstruct() {
+	if (typeof Reflect === 'undefined' || !Reflect.construct) return false;
+	if (Reflect.construct.sham) return false;
+	if (typeof Proxy === 'function') return true;
+	try {
+		Date.prototype.toString.call(Reflect.construct(Date, [], function () { }));
+		return true;
+	} catch (e) {
+		return false;
+	}
+}
+
+function _isNativeFunction(fn) {
+	return Function.toString.call(fn).indexOf('[native code]') !== -1;
+}
+
+function _setPrototypeOf(o, p) {
+	_setPrototypeOf =
+		Object.setPrototypeOf ||
+		function _setPrototypeOf(o, p) {
+			o.__proto__ = p;
+			return o;
+		};
+	return _setPrototypeOf(o, p);
+}
+
+function _getPrototypeOf(o) {
+	_getPrototypeOf = Object.setPrototypeOf
+		? Object.getPrototypeOf
+		: function _getPrototypeOf(o) {
+			return o.__proto__ || Object.getPrototypeOf(o);
+		};
+	return _getPrototypeOf(o);
+}
+
+
+// Function to check for mobile view or not 
+var isMobile = {
+	Android: function Android() {
+		return navigator.userAgent.match(/Android/i);
+	},
+	BlackBerry: function BlackBerry() {
+		return navigator.userAgent.match(/BlackBerry/i);
+	},
+	iOS: function iOS() {
+		return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+	},
+	Opera: function Opera() {
+		return navigator.userAgent.match(/Opera Mini/i);
+	},
+	Windows: function Windows() {
+		return navigator.userAgent.match(/IEMobile/i);
+	},
+	any: function any() {
+		return (
+			isMobile.Android() ||
+			isMobile.BlackBerry() ||
+			isMobile.iOS() ||
+			isMobile.Opera() ||
+			isMobile.Windows()
+		);
+	}
+};
+
+window.onload = function () {
+	let backgroundImageElement = document.getElementById("backgroundImg");
+	if (backgroundImageElement) {
+		if (isMobile.any()) {
+			document.getElementById("backgroundImg").src = document.getElementById("backgroundImg").getAttribute('mobilesrc');
+		}
+		else {
+			document.getElementById("backgroundImg").src = document.getElementById("backgroundImg").getAttribute('desktopsrc');
+		}
+	}
+}
+/**
+ * Browser is compatible If:
+ * 1. It is not IE
+ * 2. If it is edge, has version above 80
+ */
+
+// 
+function isBrowserCompatible() {
+	var userAgent = navigator.userAgent.toLowerCase();
+	var version = parseFloat(userAgent.substr(userAgent.lastIndexOf('/') + 1));
+	var isCompatible =
+		userAgent.indexOf('msie') < 0 && userAgent.indexOf('trident') < 0;
+	var isEdgeBrowser = isMicrosoftEdgeBrowser(userAgent);
+
+	if (isEdgeBrowser) {
+		isCompatible = version > 80;
+	}
+
+	return isCompatible;
+}
+
+function isMicrosoftEdgeBrowser(userAgent) {
+	return userAgent.indexOf('chrome') !== -1 && userAgent.indexOf('edg') !== -1;
+}
+
+function _debounce(func, timeout = 300){
+	let timer;
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => { func.apply(this, args); }, timeout);
+	};
+}
+
+let timeoutId;
+
+timeoutId = setTimeout(showTimeoutPopup, inactivityTime);
+
+function resetTimeout() {
+	clearTimeout(timeoutId);
+	timeoutId = setTimeout(showTimeoutPopup, inactivityTime);
+}
+function resetSession() {
+	// Reset the timeout and close the modal
+	resetTimeout();
+	closeModal();
+}
+function showTimeoutPopup() {
+	if (shadow && shadow.shadowRoot && !shadow.shadowRoot.querySelector('.chat-window').querySelector('.download-container')) {
+
+		var chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+		let botFontColor = shadow.getAttribute('chat-bot-font-color') || '#231f20';
+
+		chatWindow.querySelector('.chat-title').querySelector('.buttons-container').querySelector('.btn-animate-hover').querySelector('.refresh-button').removeAttribute('tabindex');
+		chatWindow.querySelector('.chat-footer').querySelector('.chat-input').setAttribute('tabindex', '-1')
+		var sessionTimeoutOverlay = document.createElement('div');
+		sessionTimeoutOverlay.classList.add('download-overlay');
+		// sessionTimeoutOverlay.style.animation = 'fadeIn 1s linear';
+		sessionTimeoutOverlay.style.opacity = '0.3';
+		sessionTimeoutOverlay.style.display = 'block';
+		var sessionTimeoutContent = document.createElement('div');
+		sessionTimeoutContent.classList.add(
+			'download-container'
+		);
+
+		let sessionTimeoutLanguageMapping = [
+			{ sessionTimeoutText: '<p lang="en-us">Warning: Your session has expired.</p><p lang="en-us"> Please click on the button below to start the new session.</p >', btnText: "Start new session", value: 'en-us' },
+			{ sessionTimeoutText: '<p lang="es-us">Advertencia: Su sesión ha caducado.</p><p lang="es-us"> Haga clic en el botón a continuación para iniciar la nueva sesión.</p >', btnText: "Iniciar nueva sesión", value: 'es-us' },
+			{ sessionTimeoutText: '<p lang="pl">Ostrzeżenie: Twoja sesja wygasła.</p><p lang="pl"> Kliknij poniższy przycisk, aby rozpocząć nową sesję.</p >', btnText: "Uruchom nową sesję", value: 'pl' },
+			{ sessionTimeoutText: '<p lang="fil">Paalala: Nag-expire na ang session mo.</p><p lang="fil"> Mangyaring mag-click sa button sa ibaba para simulan ang bagong session.</p >', btnText: "Simulan ang Bagong Session", value: 'fil' },
+			{ sessionTimeoutText: '<p lang="zh-cn">警告：您的会话已过期。</p><p lang="zh-cn">请点击下方按钮开启新会话。</p>', btnText: "开启新会话", value: 'zh-cn' }
+		];
+
+		let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+		let sessionTimeoutLanguageText = sessionTimeoutLanguageMapping.filter((langObj) => langObj.value == selectedLanguage);
+		if(sessionTimeoutLanguageText && sessionTimeoutLanguageText[0]) {
+			sessionTimeoutLanguageText = sessionTimeoutLanguageText[0];
+		}
+		else {
+			sessionTimeoutLanguageText = sessionTimeoutLanguageMapping[0];
+		}
+
+		var SessionTimeoutText = ` ${sessionTimeoutLanguageText.sessionTimeoutText} 
+      <button class="download-btn" style="margin: 0;" style onclick="refreshSession()" lang="${sessionTimeoutLanguageText.value}">${sessionTimeoutLanguageText.btnText}</button>
+      `;
+
+		sessionTimeoutContent.innerHTML = `<div class="confirm-container"><div class="confirm-txt" style="color:${botFontColor}">`
+			.concat(
+				SessionTimeoutText,
+				'</div></div> </div></a></div></div><div class="close-btn-container btn-animate-hover" onclick="closeOverlay(event)"  onkeydown="handleEnterKeyClose(event)"><img class="close-btn-overlay" tabindex=0  alt="close modal" src="'
+			)
+			.concat(storageUrl, '/close-black.svg"></div>');
+
+		if(chatWindow.children && chatWindow.children.length) {
+			Array.from(chatWindow.children).forEach(function(child) {
+				if (child !== sessionTimeoutContent) {
+					child.setAttribute('aria-hidden', 'true');
+				}
+			});
+		}
+		chatWindow.appendChild(sessionTimeoutOverlay);
+		chatWindow.appendChild(sessionTimeoutContent);
+		var downloadContainer = shadow.shadowRoot.querySelector('.download-container');
+		downloadContainer.setAttribute('style', 'font-family: "Roboto", sans-serif;')
+	}
+}
+function closeModal() {
+	// Close the modal
+	var chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+	var sessionTimeoutOverlay = document.createElement('div');
+	sessionTimeoutOverlay.style.display = 'none';
+}
+
+window.addEventListener('mousemove', resetTimeout);
+window.addEventListener('keydown', resetTimeout);
+window.addEventListener('click', resetTimeout);
+
+
+//If not browser compatible, starting to create the div element with an error message
+if (!isBrowserCompatible()) {
+	var body = document.querySelector('body');
+	var messageContainer = document.createElement('div');
+	messageContainer.classList.add('compatible-msg-container');
+	var message = document.createElement('div');
+	message.classList.add('compatible-msg');
+	message.innerHTML = 'Please update to the latest version of your browser to use CTA Bot.'; //If not browser compatible - then error message
+	messageContainer.appendChild(message);
+	var closeBtnContainer = document.createElement('div');
+	closeBtnContainer.classList.add('close-btn-container', 'btn-animate-hover');
+	var closeBtn = document.createElement('img');
+	closeBtn.setAttribute('id', 'close-btn');
+	closeBtn.setAttribute('aria-label', 'minimize chat window');
+	closeBtn.src = storageUrl.concat('/close-black.svg');
+	closeBtnContainer.appendChild(closeBtn);
+	messageContainer.appendChild(closeBtnContainer);
+
+	if (closeBtnContainer.addEventListener) {
+		closeBtnContainer.addEventListener('click', function (event) {
+			messageContainer.style.animation = 'fade 1s linear';
+			messageContainer.style.opacity = '0';
+			messageContainer.style.display = 'none';
+			event.stopPropagation();
+		});
+	} else if (closeBtnContainer.attachEvent) {
+		closeBtnContainer.attachEvent('onclick', function (event) {
+			messageContainer.style.animation = 'fade 1s linear';
+			messageContainer.style.opacity = '0';
+			messageContainer.style.display = 'none';
+			event.stopPropagation();
+		});
+	}
+
+	body.appendChild(messageContainer);
+} else {
+	//If it is browser compatible - then we add chat window etc 
+	try {
+		var openChatWindow = function openChatWindow(event) {
+			event?.preventDefault();
+			resetTimeout();
+
+			if (shadow && shadow.shadowRoot) {
+				//creating the chat widget wrapper
+				var wrapper = shadow.shadowRoot.querySelector('.wrapper');
+				var chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+
+				// Add a click event listener to the chat window
+				chatWindow.addEventListener('click', function (event) {
+					// Prevent event propagation
+					event.stopPropagation();
+				});
+
+				//qIcon is chat widget icon when it is closed 
+				var qIcon = shadow.shadowRoot.querySelector('#q-icon');
+				//closeIcon is chat widget icon when it is opened
+				var closeIcon = shadow.shadowRoot.querySelector('#close-icon');
+
+				//The welcome banner next to icon 
+				var wrapperMsgContainer = shadow.shadowRoot.querySelector(
+					'.wrapper-msg-container'
+				);
+
+				//User input field
+				var chatInput = shadow.shadowRoot.querySelector('.chat-input');
+				chatInput.addEventListener('click', resetTimeout);
+				chatInput.addEventListener('keypress', resetTimeout);
+
+				//display of chat widget and chat widget icon changing based on open or close attribute
+				//Question - where is the opened attribute for chatwindow defined
+				if (chatWindow.getAttribute('opened') === 'false') {
+					let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+					document.documentElement.setAttribute('lang', selectedLanguage);
+
+					let userId = sessionStorage.getItem('user-id');
+					if(!userId) {
+						let messageContainer = shadow.shadowRoot.querySelector('.message-container');
+						shadow._appendBotMessages(messageContainer);
+					}
+
+					// wrapper overlay added
+					let wrapperOverlay = shadow.shadowRoot.querySelector('.wrapper-overlay');
+					if(wrapperOverlay) {
+						wrapperOverlay.style.display = 'block';
+					}
+					resetTimeout()
+					if (isMobile.any()) {
+
+						var screenHeight = '100%'; //window.innerHeight + 'px';
+						var windowBorderRadius = '0px'; //window.innerHeight + 'px';
+
+						var heightVariable = 'height:' + screenHeight + ';' + 'border-radius:' + windowBorderRadius + ';';
+
+						chatWindow.setAttribute('style', heightVariable);
+					}
+					resetTimeout()
+					document.body.style.overflow = 'hidden';
+					chatInput.focus();
+					chatWindow.setAttribute('opened', 'true');
+					closeIcon.style.display = 'flex';
+					qIcon.style.display = 'none';
+					wrapper.className = 'wrapper expanded';
+					wrapperMsgContainer.style.animation = 'fade 1s linear';
+					wrapperMsgContainer.style.opacity = '0';
+					wrapperMsgContainer.style.display = 'none';
+					chatWindow.style.display = 'flex';
+					chatWindow.style.opacity = '1';
+				} else {
+					resetTimeout()
+					document.documentElement.setAttribute('lang', intialLangValue);
+					document.body.style.overflow = '';
+					// wrapper overlay removed
+					let wrapperOverlay = shadow.shadowRoot.querySelector('.wrapper-overlay');
+					if(wrapperOverlay) {
+						wrapperOverlay.style.display = 'none';
+					}
+					chatWindow.setAttribute('opened', 'false');
+					qIcon.style.display = 'flex';
+					qIcon.style.animation = 'spin 0.3s linear reverse';
+					closeIcon.style.display = 'none';
+					wrapper.className = 'wrapper';
+					chatWindow.style.display = 'none';
+					chatWindow.style.opacity = '0';
+
+				}
+			}
+		};
+
+		//Remove dropdowns 
+		var resetBotElements = function resetBotElements() {
+			var shadow = document.querySelector('#shadow');
+
+			if (shadow && shadow.shadowRoot) {
+				if (shadow.shadowRoot.querySelector('.suggestion-dropdown')) {
+					shadow.shadowRoot.querySelector('.suggestion-dropdown').remove();
+					shadow.addrSuggestionShown = false;
+				}
+			}
+		};
+
+		//function to get date time in specific format 
+		var getFormattedDateTime = function getFormattedDateTime(date) {
+			var options = {
+				month: 'short',
+				day: '2-digit',
+				hour: 'numeric',
+				minute: 'numeric',
+				hour12: true
+			};
+			return new Intl.DateTimeFormat('default', options).format(date).replace(',', ' - ').replace('at', ' - ')
+		};
+
+
+		// Function that gets access cookies value of name parameter
+		var getCookieValue = function getCookieValue(name) {
+			var expectedCookie;
+			var cookies = (document.cookie && document.cookie.split(';')) || [];
+
+			if (cookies.length) {
+				var result = '';
+
+				for (var i = 0; i < cookies.length; i++) {
+					expectedCookie = cookies[i].trim().split('=');
+
+					if (expectedCookie[0] === name) {
+						result = expectedCookie[1];
+						break;
+					}
+				}
+				
+				if(!result && localStorage.getItem(name)) {
+					result = localStorage.getItem(name);
+				}
+				
+				return result;
+			} else if (localStorage.getItem(name)) {
+				return localStorage.getItem(name);
+			} else {
+				return '';
+			}
+		};
+
+		//Sets a cookie attribute to a specific value
+		var setCookie = function setCookie(name, value, expireHours) {
+			if (expireHours) {
+				var date = new Date();
+				date.setTime(date.getTime() + expireHours * 3600 * 1000);
+				var expires = 'expires=' + date.toUTCString();
+				document.cookie = name + '=' + value + '; ' + expires;
+			} else {
+				document.cookie = name + '=' + value;
+			}
+
+			localStorage.setItem(name, value);
+		};
+
+
+		// Function for suggestion dropdowns
+		var handleSuggestions = function handleSuggestions(response, self, flag) {
+			var footer = self.shadow.querySelector('.chat-footer');
+			var input = self.shadow.querySelector('.chat-input');
+			var isAddrSuggestion = flag === 'suggestAddress';
+
+			if (input && input.value) {
+				var strip;
+				var suggestionContainer = document.createElement('div');
+
+				//creating suggestion-dropdown class
+				suggestionContainer.setAttribute('class', 'suggestion-dropdown');
+
+				var suggestionCandidates = isAddrSuggestion
+					? response.candidates
+					: response;
+
+				if (suggestionCandidates && suggestionCandidates.length) {
+					var _suggestionCandidates = response;
+
+					if (isAddrSuggestion) {
+						self.addressCandidates = response.candidates;
+						_suggestionCandidates = self.addressCandidates;
+						self.addrSelected = false;
+						self.addrSuggestionShown = true;
+					}
+
+					_suggestionCandidates.forEach(function (value, i) {
+						var suggestion = '';
+						var location = {};
+
+						if (isAddrSuggestion) {
+							suggestion = value.address;
+						} else {
+							suggestion =
+								getCookieValue('languageCode') === 'es'
+									? value.service_name_sp
+									: value.service_name;
+						}
+
+						if (value.location && isAddrSuggestion) {
+							location = {
+								xCoord: value.location.x,
+								yCoord: value.location.y
+							};
+							value.customLocation = location;
+						}
+
+						if (suggestion) {
+							/* create a DIV element for each matching element: */
+							strip = document.createElement('DIV');
+							i !== _suggestionCandidates.length &&
+								strip.setAttribute('class', 'suggestion-strip');
+
+							strip.innerHTML += suggestion;
+							/* insert a input field that will hold the current array item's value: */
+
+							strip.innerHTML +=
+								"<input type='hidden' value='" + suggestion + "'>";
+							/* execute a function when someone clicks on the item value (DIV element): */
+
+							strip.addEventListener('click', function (e) {
+								/* insert the value for the autocomplete text field: */
+								input.value = this.getElementsByTagName('input')[0].value;
+								self.shadow
+									.querySelector('.suggestion-dropdown')
+									.classList.add('hide');
+								self.addrSelected = isAddrSuggestion;
+
+								self._sendMessage(location);
+							});
+							suggestionContainer.appendChild(strip);
+						}
+					});
+				}
+				footer.appendChild(suggestionContainer);
+			}
+		};
+
+		//remove message banner next to widget icon
+		var removeBotMessageContainer = function removeBotMessageContainer(
+			messagesContainer
+		) {
+			messagesContainer
+				.querySelectorAll('.bot-loading-messages')
+				.forEach(function (e) {
+					return e.remove();
+				});
+			messagesContainer.querySelectorAll('.bot-message').forEach(function (e) {
+				return e.remove();
+			});
+		};
+
+		//function to have the download conversation history button feature - calls other function to actually download
+		var confirmDownloadHistory = function confirmDownloadHistory() {
+			if (shadow && shadow.shadowRoot) {
+				var chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+				var downloadOverlay = document.createElement('div');
+				downloadOverlay.classList.add('download-overlay');
+				downloadOverlay.style.animation = 'fadeIn 1s linear';
+				downloadOverlay.style.opacity = '0.5';
+				var downloadConfirm = document.createElement('div');
+				downloadConfirm.classList.add('download-container', 'flex-center');
+				var date = new Date();
+				var fileName = 'history_'.concat(date.toLocaleDateString());
+				var downloadConfirmText =
+					'Download your conversation <div>with CTA Bot ?';
+				var btnText = 'Download';
+
+				if (getCookieValue('languageCode') === 'es') {
+					downloadConfirmText = 'Descargar su conversación <div>con CTA Bot';
+					btnText = 'Descargar';
+				}
+
+				downloadConfirm.innerHTML = '<div class="confirm-container"><div class="confirm-txt">'
+					.concat(
+						downloadConfirmText,
+						'</div></div>      <div class="flex-center"><a id="download_link" download='
+					)
+					.concat(
+						fileName,
+						' onclick="closeOverlay()"><div class="download-btn">'
+					)
+					.concat(
+						btnText,
+						'</div></a></div></div><div class="close-btn-container btn-animate-hover" onclick="closeOverlay()"><img class="close-btn-overlay" aria-label="close modal" src="'
+					)
+					.concat(storageUrl, '/close-black.svg"></div>');
+				chatWindow.appendChild(downloadOverlay);
+				chatWindow.appendChild(downloadConfirm);
+				chatWindow.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+				fetchChatHistory('downloadHistory');
+			}
+		};
+
+		//function to confirm session refresh
+		var confirmSessionRefresh = function confirmSessionRefresh() {
+			if (shadow && shadow.shadowRoot) {
+
+				var chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+				let botFontColor = shadow.getAttribute('chat-bot-font-color') || '#231f20';
+
+				chatWindow.querySelector('.chat-title').querySelector('.buttons-container').querySelector('.btn-animate-hover').querySelector('.refresh-button').removeAttribute('tabindex');
+				chatWindow.querySelector('.chat-footer').querySelector('.chat-input').setAttribute('tabindex', '-1')
+
+				let refreshSessionLanguageMapping = [
+					{ refreshSessionText: 'Are you sure that you want to refresh this session?<br><br> You will lose all conversation history.', btnText: "Start new session", value: 'en-us' },
+					{ refreshSessionText: '¿Está seguro de que quiere actualizar esta sesión?<br><br> Perderá todo el historial de la conversación.', btnText: "Iniciar nueva sesión", value: 'es-us' },
+					{ refreshSessionText: 'Czy na pewno chcesz odświeżyć tę sesję?<br><br> Utracisz całą historię rozmów.', btnText: "Uruchom nową sesję", value: 'pl' },
+					{ refreshSessionText: 'Sigurado ka bang gusto mong i-refresh ang session na ito?<br><br> Mawawala ang buong history ng usapan.', btnText: "Simulan ang bagong session", value: 'fil' },
+					{ refreshSessionText: '您确定要刷新此会话吗？<br><br>您将丢失所有对话历史记录。', btnText: "开启新会话", value: 'zh-cn' }
+				];
+
+				let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+				let refreshSessionLanguageText = refreshSessionLanguageMapping.filter((langObj) => langObj.value == selectedLanguage);
+				if(refreshSessionLanguageText && refreshSessionLanguageText[0]) {
+					refreshSessionLanguageText = refreshSessionLanguageText[0];
+				}
+				else {
+					refreshSessionLanguageText = refreshSessionLanguageMapping[0];
+				}
+
+				var refreshSessionOverlay = document.createElement('div');
+				refreshSessionOverlay.classList.add('download-overlay');
+				// refreshSessionOverlay.style.animation = 'fadeIn 1s linear';
+				refreshSessionOverlay.style.opacity = '0.3';
+				var refreshSessionConfirm = document.createElement('div');
+				refreshSessionConfirm.classList.add(
+					'download-container'
+				);
+
+				refreshSessionConfirm.innerHTML = `<div class="confirm-container"><div class="confirm-txt" lang="${refreshSessionLanguageText.value}" style="color:${botFontColor}">`
+					.concat(
+						refreshSessionLanguageText.refreshSessionText,
+						`</div></div>      <div class="flex-center"><span onclick="refreshSession()" onkeydown="handleEnterKeyRefresh(event)" tabindex=0><div class="download-btn" lang="${refreshSessionLanguageText.value}">`
+					)
+					.concat(
+						refreshSessionLanguageText.btnText,
+						'</div></a></div></div><div class="close-btn-container btn-animate-hover" onclick="closeOverlay()" onkeydown="handleEnterKeyClose(event)"><img class="close-btn-overlay" tabindex=0 aria-label="close refresh chat session" src="'
+					)
+					.concat(storageUrl, '/close-black.svg"></div>');
+
+				if(chatWindow.children && chatWindow.children.length) {
+					Array.from(chatWindow.children).forEach(function(child) {
+						if (child !== refreshSessionConfirm) {
+							child.setAttribute('aria-hidden', 'true');
+							// Array.from(child.querySelectorAll('*')).forEach(function(el) {
+							// 	el.setAttribute('tabindex', '-1');
+							// });
+						}
+					});
+				}
+				chatWindow.appendChild(refreshSessionOverlay);
+				chatWindow.appendChild(refreshSessionConfirm);
+				var downloadContainer = shadow.shadowRoot.querySelector('.download-container');
+				downloadContainer.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";')
+			}
+		};
+
+		var refreshSession = function refreshSession() {
+			closeOverlay();
+			resetTimeout();
+			shadow.shadowRoot.querySelector('.chat-window').querySelector('.chat-title').querySelector('.buttons-container').querySelector('.btn-animate-hover').querySelector('.refresh-button').setAttribute('tabindex', '0');
+			shadow.shadowRoot.querySelector('.chat-window').querySelector('.chat-footer').querySelector('.chat-input').setAttribute('tabindex', '0');
+			//refresh session functionality
+			shadow._refreshSession(false, true);
+		}
+		var handleEnterKeyRefresh = function handleEnterKeyRefresh(event) {
+			if (event.key === 'Enter' || event.code === 'Space') {
+				refreshSession()
+			}
+		}
+		var handleEnterKeyClose = function handleEnterKeyClose(event) {
+			if (event.key === 'Enter' || event.code === 'Space') {
+				closeOverlay()
+			}
+		}
+
+		//function for language change button feature
+		var confirmLanguageChange = function confirmLanguageChange() {
+			if (shadow && shadow.shadowRoot) {
+				var chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+				var languageChangeOverlay = document.createElement('div');
+				languageChangeOverlay.classList.add('download-overlay');
+				// languageChangeOverlay.style.animation = 'fadeIn 1s linear';
+				languageChangeOverlay.style.opacity = '0.3';
+				var languageChangeConfirm = document.createElement('div');
+				languageChangeConfirm.classList.add(
+					'download-container',
+					'flex-center'
+				);
+				var languageChangeText =
+					'¿Quiere cambiar a Español? <div>Todas sus respuestas anteriores serán eliminadas.';
+				var btnText = 'Cambia el idioma';
+
+				if (getCookieValue('languageCode') === 'es') {
+					languageChangeText =
+						'Do you want to switch to English? <div>All your previous responses will be deleted.';
+					btnText = 'Change Language';
+				}
+
+				languageChangeConfirm.innerHTML = '<div class="confirm-container"><div class="confirm-txt">'
+					.concat(
+						languageChangeText,
+						'</div></div>      <div class="flex-center"><span onclick="changeLanguage()"><div class="download-btn">'
+					)
+					.concat(
+						btnText,
+						'</div></a></div></div><div class="close-btn-container btn-animate-hover" onclick="closeOverlay()"><img class="close-btn-overlay" aria-label="close modal" src="'
+					)
+					.concat(storageUrl, '/close-black.svg"></div>');
+				chatWindow.appendChild(languageChangeOverlay);
+				chatWindow.appendChild(languageChangeConfirm);
+			}
+		};
+
+		//change language cookie code
+		var changeLanguage = function changeLanguage() {
+			var newLanguage = getCookieValue('languageCode') === 'es' ? 'en-us' : 'es';
+
+			if (shadow && shadow.shadowRoot) {
+				setCookie('languageCode', newLanguage);
+				closeOverlay();
+
+				shadow._refreshSession(false);
+			}
+		};
+
+
+		//function for close chat widget feature 
+		var closeOverlay = function closeOverlay(event) {
+			if (shadow && shadow.shadowRoot) {
+				shadow.shadowRoot.querySelector('.chat-window').querySelector('.chat-title').querySelector('.buttons-container').querySelector('.btn-animate-hover').querySelector('.refresh-button').setAttribute('tabindex', '0');
+				shadow.shadowRoot.querySelector('.chat-window').querySelector('.chat-footer').querySelector('.chat-input').setAttribute('tabindex', '0');
+
+				var downloadOverlay = shadow.shadowRoot.querySelector(
+					'.download-overlay'
+				);
+				var downloadContainer = shadow.shadowRoot.querySelector(
+					'.download-container'
+				);
+
+				let chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+
+				if(chatWindow.children && chatWindow.children.length) {
+					Array.from(chatWindow.children).forEach(function(child) {
+						child.removeAttribute('aria-hidden');
+					});
+				}
+
+				// downloadContainer.style.animation = 'fadeOut 0s linear';
+				// downloadContainer.style.opacity = '0';
+				setTimeout(function () {
+					downloadContainer.remove();
+					downloadOverlay.remove();
+				}, 100);
+			}
+			if (event) {
+				shadow._refreshSession(true, true);
+			}
+		};
+
+
+		//get chat history
+		var fetchChatHistory = function fetchChatHistory(flag) {
+			var self = shadow;
+			var userId = sessionStorage.getItem('user-id');
+			var url = ''
+				.concat(self.integrationServiceDomain, '/api/v1/messages/chat-history/')
+				.concat(encodeURI(userId));
+			var authHeader = btoa(
+				''.concat(atob(self.userName), ':').concat(atob(self.password))
+			);
+			setTimeout(function () {
+				self._requestHandler(
+					'GET',
+					url,
+					{
+						flag: flag
+					},
+					self._showChatHistory,
+					authHeader
+				);
+			}, 0);
+		};
+
+		//scroll bar for chat widget
+		var scrollAtBottom = function scrollAtBottom() {
+			var shadowDemo = document.querySelector('#shadow').shadowRoot;
+			var messageContainer = shadowDemo.querySelector('.message-container');
+			messageContainer.scrollTop = messageContainer.scrollHeight;
+		};
+
+		var stripTags = function stripTags(str) {
+			if (str === null || str === '') {
+				return '';
+			} else {
+				str = str.toString();
+			} // Replacing the identified HTML tag with a null string.
+
+			return str.replace(/(<([^>]+)>)/gi, '');
+		};
+
+		var convertAmPm = function convertAmPm(time) {
+			// Check correct time format and split into components
+			time = time
+				.toString()
+				.match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+			if (time.length > 1) {
+				// If time format correct
+				time = time.slice(1); // Remove full string match value
+
+				time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+
+				time[0] = +time[0] % 12 || 12; // Adjust hours
+			}
+
+			return time.join(''); // return adjusted time or original string
+		};
+
+		var ShadowDemo = /* #__PURE__ */ (function (_HTMLElement) {
+			_inherits(ShadowDemo, _HTMLElement);
+
+			var _super = _createSuper(ShadowDemo);
+
+			function ShadowDemo() {
+				var _this;
+
+				_classCallCheck(this, ShadowDemo);
+
+				_this = _super.call(this);
+				_this.shadow = _this.attachShadow({
+					mode: 'open'
+				});
+				_this.userName = 'dXNlcm5hbWUx';
+				_this.password = 'cGFzc3dvcmQy';
+				_this.languageCodeMap = {
+					English: 'en-us',
+				};
+				_this.timeout = null;
+				_this.addressInputThreshold = 4;
+				_this.chatHistory = '';
+				var shadowURL = document.querySelector('#shadow');
+				_this.integrationServiceDomain = shadowURL.getAttribute('is-service-url');
+				// integration service in local
+				_this.storageUrl = shadowURL.getAttribute('storage-url');
+				storageUrl = _this.storageUrl;
+				_this._buildChatBox();
+
+				return _this;
+			}
+			//Calls the createClass function
+			_createClass(ShadowDemo, [
+				{
+					key: '_buildChatBox',
+					value: function _buildChatBox() {
+						var style = document.createElement('style');
+						style.textContent =
+							"\n          :.wrapper-container{\n            bottom: 15px;\n            right: 30px;\n            position: absolute;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n         z-index: 10100;\n   }\n          .wrapper-overlay{\n            display: none;\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background-color: rgba(0, 0, 0, 0.5); /* semi-transparent background */\n            z-index: 9999; /* ensures it's above other content */\n   }\n          .wrapper-msg-container {\n            position: fixed;\n            display: none;\n            align-items: center;\n            justify-content: center;\n            color: #fff;\n            font-size: 16px;\n            height: 32px;\n            cursor: pointer;\n            background-color: var(--bot-message-bg);\n            border-radius: 4px;\n            box-shadow: 1px 1px 15px 3px #888888;\n            padding: 9px;\n            margin-right: 5px;\n            bottom: 18px;\n            right: 75px;\n          }\n          .wrapper {\n            z-index: 10;\n            position: fixed;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            cursor: pointer;\n            height: 56px;\n            width: 56px;\n            background-color: var(--chat-title-color);\n            border-radius: 30px;\n            box-shadow: 0px 0px 2px 0px #888888;\n            bottom: 15px;\n            right: 10px;\n        }\n        .bot-message-container{\n          width: 85%;\n          margin-left: 0.3rem;\n          display: flex;\n          flex-direction: column;\n     padding-top:5px;\n   }\n          .chat-window {\n              opacity: 0;\n              background-color: #fafafa;\n              border-radius: 4px;\n              bottom: 90px;\n              box-shadow: rgba(0, 0, 0, 0.24) 1px 4px 15px 0px;\n              display: flex;\n              flex-direction: column;\n              position: fixed;\n              right: 10px;\n              width: 390px;\n              transform: translateX(25%) translateY(35%) scale(0.5, 0.5);\n              transition: opacity 0.5s, display 0.5s ease-in;\n transition: transform 0.5s ease, opacity 0.5s ease-in, height 0s ease 0.5s;\n              height: 0;\n              opacity: 0;\n              overflow: hidden;\n          }\n\n          .chat-window[opened='true'] {\n              height: 530px;\n              max-height: 80vh;\n              transform: translate3d(0px, 0px, 0px) scale(1, 1);\n              transition: opacity 0.5s, display 0.5s ease-in;\n              opacity: 1;\n         z-index: 10100;\n   }\n          .hide{\n              display: none;\n                }\n          .chat-title {\n              display: flex;\n              justify-content: space-between;\n              width: 100%;\n              height: 20%;\n              background-color: var(--chat-title-color);\n              align-items: center;\n              padding: 0 1rem;\n              color: white;\n              font-size: 18px;\n     font-weight:700     }\n          .chat-title.scrollGradient{\n              box-shadow: 0 3px 8px 0 rgb(18 19 20 / 50%);\n              -webkit-box-shadow: 0 3px 8px 0 rgb(18 19 20 / 50%);\n              -moz-box-shadow: 0 3px 8px 0 rgb(18 19 20 / 50%); \n          }\n          .widget-title{\n           margin-right:20px;\n  margin-top:4px;\n            }\n          .left-title-container{\n             display:flex;\n               align-items: center;\n          }\n          .chat-title #chatbot-logo{\n              width: 26px;\n          }\n          .buttons-container{\n              display: flex;\n              margin-right: 1rem;\n          }\n          .buttons-container > div {\n            overflow: hidden;\n            border: none;\n            padding: 14px;\n          }\n          .download-container{\n            background: #fff;\n            z-index: 24000;\n            position: absolute;\n            top: 40%;\n            left: 10%;\n            border-radius: 10px;\n     padding-bottom:3%;\n           width: 80%;\n          }\n          .download-container a{\n            text-decoration: none;\n          }\n          .download-container .close-btn-container{\n            position: absolute;\n            right: 7px;\n            top: 7px;\n            cursor: pointer;\n            padding: 4px;\n      width:20    }\n          .download-container .close-btn-container .close-btn-overlay{\n            width: 10px;\n          }\n          .message-container .bot-message a {\n              color: #FFB333\n          }\n          .chat-messages {\n              display: flex;\n         background-color:#F9F9F9;\n     flex-direction: column;\n              justify-content: flex-end;\n              height: 460px;\n              max-height: 72vh;\n              width: 100%;\n              overflow-y: hidden;\n          }\n\n          .message-container {\n              display: flex;\n              flex-direction: column;\n              overflow-y: auto;\n              overflow-x: hidden;\n              scroll-behavior: smooth;\n              font-size: 16px;\n          }\n          .message-container .scroll-down {\n            position: fixed;\n            display: none;\n            bottom: 55px;\n            right: 17px;\n            z-index: 10099;\n            border: none;\n            outline: none;\n            background-color: rgb(173 170 173 / 41%);\n            cursor: pointer;\n            padding: 11px;\n            border-radius: 4px;\n            border-radius: 25px;\n            overflow: hidden;\n          }\n          .message-container .scroll-down img {\n            width: 14px;\n          }\n          .outer-user-message-container{\n            padding: 0.3rem;\n            display: flex;\n            justify-content: flex-end;\n            align-items: center;\n            flex: 1 0 auto;\n          }\n          .outer-bot-message-container{\n            margin-bottom: 0.3rem;\n            display: flex;\n            align-items: center;\n          }\n          .multiple-message-container{\n            padding: 0.4rem;\n          }\n          .date-container{\n            position: relative;\n          }\n          .date-container .calendar-icon, .date-container .clock-icon{\n            position: absolute;\n            width: 20px;\n            top: 4.5px;\n            left: 8px;\n          }\n          .multiple-message-container #datePicker, .multiple-message-container #timePicker{\n            cursor: pointer;\n            width: 100%;\n            padding: 7px 10px;\n            padding-left: 38px;\n            border: 1.5px solid #2166B1 ;\n            border-radius: 4px;\n          }\n          .chat-msg-icon{\n            width: 25px;\n            height: 25px;\n       }\n    .chat-msg-icon-user{\n            width: 25px;\n            height: 25px;\n  margin-bottom:17px\n       }\n          .chat-icon-div{\n            width: 25px;\n            height: 25px;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n          }\n          .flex-center{\n            display: flex;\n            align-items: center;\n            justify-content: center;\n          }\n          .confirm-txt{\n            margin: 4%;\n            text-align: center;\n            font-size: 16px;\n          }\n          .download-btn{\n     background-color: #2166B1 ;\n            color: #fff;\n            width: fit-content;\n            padding: 5px 15px;\n            border-radius: 4px;\n            cursor: pointer;\n            transform: translateY(-0.8px);\n          }\n          .chat-icon-skeleton{\n            width: 25px;\n            height: 25px;\n            border-radius: 25px;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            margin-right: 0.3rem;\n            min-width: 25px;\n          }\n          .bot-message {\n       margin-left:0.2rem;\n        background-color: var(--bot-message-bg);;\n              width: fit-content;\n              float: left;\n              max-width: 64%;\n              align-self: flex-start;\n              font-size: 16px;\n              padding: 0.7rem;\n              color: var(--bot-message-font-color);\n              margin-bottom: 0rem;\n              border: 1px solid #e0e0e0;\n              border-top-left-radius: 0.7rem;\n              border-top-right-radius: 0.7rem;\n              border-bottom-right-radius: 0.7rem;\n              overflow-wrap: break-word;\n          }\n          .bot-loading-messages {\n              background-color: var(--bot-message-bg);;\n              width: fit-content;\n              max-width: 50%;\n              align-self: flex-start;\n              font-size: 16px;\n              padding: 0.7rem;\n              color: var(--bot-message-font-color);\n              margin: 0.25rem 0 0.75rem 0.5rem;\n              border: 1px solid #e0e0e0;\n              border-top-left-radius: 0.7rem;\n              border-top-right-radius: 0.7rem;\n              border-bottom-right-radius: 0.7rem;\n              overflow-wrap: break-word;\n          }\n          .btn-animate-hover{\n              display: flex;\n              justify-content: center;\n              align-items: center;\n              border: 1px solid transparent;\n              box-sizing: border-box;\n              cursor: pointer;\n              outline: none;\n              -webkit-tap-highlight-color: transparent;\n              min-width: 0;\n              position: relative;\n              padding: 3px;\n          }\n          .btn-animate-hover:after {\n              border: none;\n              opacity: 0;\n              content: \"\";\n              position: absolute;\n              transition-duration: .15s;\n              transition-timing-function: cubic-bezier(.4,0,.2,1);\n              transform: scale(0);\n              transition-property: transform,opacity;\n              border-radius: 4px;\n              bottom: 0;\n              left: 0;\n              right: 0;\n              top: 0;\n          }\n          .wrapper-message{\n            width: 150px;\n          }\n          .close-btn-container #close-btn{\n            width: 12px;\n          }\n          .wrapper-msg-container .close-btn-container{\n            display: block;\n            position: absolute;\n            right: 2px;\n            top: 3px;\n          }\n          .btn-animate-hover:hover:after {\n              // background-color: rgb(173 170 173 / 41%);\n              background-color: #2196f6;\n              opacity: 0.5;\n              border: none;\n              // opacity: 1;\n              transform: scale(1);\n          }\n          .user-message {\n              position: relative;\n              float: right;\n              font-size: 16px;\n              background-color: var(--user-message-bg);\n              width: fit-content;\n   max-width:20rem;\n           align-self: flex-end;\n              padding: 0.7rem;\n              color: var(--user-message-font-color);\n              margin-bottom: 0.28rem;\n              border: 1px solid #e0e0e0;\n              border-top-left-radius: 0.7rem;\n              border-top-right-radius: 0.7rem;\n              border-bottom-left-radius: 0.7rem;\n              overflow-wrap: break-word;\n          }\n          .user-message-container .time-div{\n            align-self: flex-end;\n          }\n          .time-div{\n            color: #bcbec0;\n            font-size: 11px;\n           margin-bottom: 5px;\n     margin-left: calc(0.4rem + 2px);\n          }\n          .user-message-container{\n            display: flex;\n            flex-direction: column;\n            align-self: flex-end;\n            margin-right: 0.3rem;\n            max-width: 60%;\n          }\n          .margin10{\n              margin: 10px;\n          }\n          .marginR10{\n              margin-right:10px;\n          }\n          .marginR5{\n              margin-right:5px;\n          }\n          .table, .image{\n              align-items: center;\n              background-color: white;\n              border-radius: 4px;\n              border: 1px solid;\n              border-color: #e0e0e0;\n              box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.24);\n              color: black;\n              padding: 5px;\n              font-size: 16px;\n              margin-bottom: 4px;\n          }\n          .table-container .table-col{\n              padding: 5px;\n          }\n          .table .header-row{\n              font-weight: 600;\n          }\n          .table .table-row .table-col{\n            min-width: 85px;\n          }\n          .table .highlight-row{\n            background-color: #EBF6FF;\n          }\n          .message-container .img-container{\n              padding: 2px;\n              width: 55%;\n          }\n          .width50{\n              width: 50%;\n          }\n          .width100{\n              width: 100%;\n          }\n          .message-container .image{\n              width: 60%;\n              padding: 0px;\n              border: 1.5px solid #2166B1 ;\n          }\n          .message-container .image:hover{\n              -webkit-box-shadow: 10px 10px 5px -4px rgba(173,170,173,0.73);\n              -moz-box-shadow: 10px 10px 5px -4px rgba(173,170,173,0.73);\n              box-shadow: 10px 10px 5px -4px rgba(173,170,173,0.73);\n          }\n          .suggestion-chip {\n            text-align: left;\n            align-items: center;\n            background-color: transparent;\n            border-radius: 7px;\n            border: 1.1px solid;\n            color: #2166B1;\n            cursor: pointer;\n            display: inline-flex;\n            font-size: 16px;\n   font-weight: bold;\n         margin-right: 10px;\n            margin-bottom: 4px;\n            padding: 5px 10px;\n            text-decoration: none;\n            vertical-align: bottom;\n          }\n          .chat-footer .suggestion-dropdown .suggestion-strip:hover{\n              box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.24);\n              transform: translateY(-0.8px);\n          }\n          .download-overlay {\n       position: fixed;\n            top: 0;\n            bottom: 0;\n            left: 0;\n            right: 0;\n            z-index: 20000;\n            background-color: #333;\n            opacity: 0;\n          }\n          .confirm-container{\n            padding: 20px 0px;\n              z-index: 22000;\n          }\n          .message-container .dropdown {\n              border: 1px solid gray;\n              border-radius: 4px;\n              padding: 10px 30px 10px 20px;\n              background-color: #ffffff;\n              cursor: pointer;\n              white-space: nowrap;\n              width: 60%;\n          }\n\n          .chat-footer {\n              border-top: 1px solid #eeeeee;\n              display: flex;\n              align-items: center;\n              background: #fff;\n    padding-inline: 0.8rem;\n         }\n          .chat-footer .suggestion-dropdown{\n              position: absolute;\n              border: 1px solid #d4d4d4;\n              border-bottom: none;\n              border-top: none;\n              z-index: 10099;\n              left: 0;\n              right: 0;\n              bottom: 45px;\n              background: #fff;\n              border-top-left-radius: 20px;\n              border-top-right-radius: 20px;\n              box-shadow: 0px -3px 5px #d4d4d4;\n              padding: 5px 10px 0px 10px;\n              max-height: 32%;\n              overflow: auto;\n          }\n          .chat-footer .suggestion-dropdown .suggestion-strip{\n              border-bottom: 1.5px solid #2166B1 ;\n              cursor: pointer;\n              padding: 6px;\n              padding-left: 1.7rem;\n              border-radius: 15px;\n              margin: 3px 0px;\n              white-space: nowrap;\n              overflow: hidden;\n              text-overflow: ellipsis;\n              font-size: 16px;\n          }\n          .chat-footer .suggestion-dropdown .suggestion-strip:hover {\n              background-color: #EBF6FF;\n          }\n          .chat-footer .refresh-button-container{\n              width: 10%;\n              background: #9a9a9a;\n              border-radius: 25px;\n              margin-left: 5px;\n          }\n          .chat-input {\n              height: 45px;\n              width: 90%;\n              border: none;\n              padding: 0 1rem 0 0rem;\n          }\n\n          .chat-input:focus {\n              outline: none;\n          }\n\n          .chat-send-button {\n              cursor: pointer;\n              display: none;\n          }\n          .tooltip {\n            position: absolute;\n  margin-bottom:4.1rem;\n padding:1px;\n  margin-left:8.9rem;\n background:#E51740;\n color:white;\n          display: inline-block;\n          }\n          \n          .tooltip .tooltip-text {\n             width: 100px;\n            background-color: #555;\n            color: #fff;\n            text-align: center;\n            border-radius: 6px;\n            padding: 5px 0;\n            position: absolute;\n            z-index: 10001;\n            top: 120%;\n            left: -50%;\n            margin-left: -60px;\n            opacity: 0;\n            transition: opacity 0.3s;\n            font-size: 16px\n          }\n          \n          .tooltip .tooltip-text::after {\n            content: \" \";\n            position: absolute;\n            bottom: 100%;  /* At the top of the tooltip */\n            left: 85%;\n            margin-left: -5px;\n            border-width: 5px;\n            border-style: solid;\n            border-color: transparent transparent #555 transparent;\n          }\n          \n          .tooltip:hover .tooltip-text {\n                   opacity: 1;\n          }\n          #q-icon {\n            width: 1.8rem;\n          }\n          #close-icon {\n            width: 1.3rem;\n            display: none;\n            -webkit-animation:spin 0.4s linear;\n            -moz-animation:spin 0.4s linear;\n            animation:spin 0.4s linear;\n          }\n          .header-button {\n            width: 1rem;\n            cursor: pointer;\n          transform: scale(1.2);\n          }\n          @-moz-keyframes spin { 100% { -moz-transform: rotate(180deg); } }\n          @-webkit-keyframes spin { 100% { -webkit-transform: rotate(180deg); } }\n          @keyframes spin { 100% { -webkit-transform: rotate(180deg); transform:rotate(-180deg); } }\n          @keyframes fade {\n              0% { opacity: 0 }\n              50% { opacity: 0.5 }\n              100% { opacity: 1 }\n          }\n          @-webkit-keyframes fadeOut {\n            0% {opacity: 1;}\n            100% {opacity: 0;}\n         }\n         \n         @keyframes fadeOut {\n            0% {opacity: 1;}\n            100% {opacity: 0;}\n         }\n         @-webkit-keyframes fadeIn {\n          0% {opacity: 0;}\n          100% {opacity: 1;}\n        }\n        \n        @keyframes fadeIn {\n            0% {opacity: 0;}\n            100% {opacity: 1;}\n        }\n          @keyframes dots {\n            0%, 20% {\n              color: #000;\n              text-shadow: 0.25em 0 0 #fff, 0.5em 0 0 #fff;\n            }\n            40% {\n              color: #fff;\n              text-shadow: 0.25em 0 0 #000, 0.5em 0 0 #000;\n            }\n            60% {\n              text-shadow: 0.25em 0 0 #000, 0.5em 0 0 #000;\n            }\n            80%, 100% {\n              text-shadow: 0.25em 0 0 #fff, 0.5em 0 0 #fff;\n            }\n          }\n          ::-webkit-scrollbar {\n              width: 0.75rem;\n          }\n\n          /* Track */\n          ::-webkit-scrollbar-track {\n          background-color: #ffffff;\n          }\n\n          /* Handle */\n          ::-webkit-scrollbar-thumb {\n          background: #9a9a9a;\n          height: 5px;\n          border-radius: 0px;\n          }\n\n          @media screen and (max-width: 481px) {\n              body {\n    zoom: 1;\n               margin: 0;\n              }\n              .chat-window[opened='true'] {\n                  max-height: none;\n                  width: 100%;\n                  right: 0;\n                  bottom: 0;\n              }\n             .chat-title {\n                  width: 97%;\n                  height: 20%;\n                  max-height: 75px;\n              }\n              .chat-messages {\n                  height: 100%;\n                  max-height: none;\n   }\n              .expanded {\n                      }\n              .close-button {\n                             display: block;\n              }\n            }\n          ";
+						this.shadow.appendChild(style);
+
+
+						this._createWrapper();
+
+						this._createChatWindow();
+					}
+				},
+				{
+					key: '_createWrapper',
+					value: function _createWrapper() {
+						let _this = this;
+						var wrapperContainer = document.createElement('div');
+						wrapperContainer.setAttribute('class', 'wrapper-container');
+						wrapperContainer.addEventListener('click', function (event) {
+							openChatWindow(event);
+						});
+						wrapperContainer.addEventListener('keydown', function (event) {
+							if (event.key === 'Enter' || event.code === 'Space') {
+								openChatWindow(event);
+							}
+						});
+
+						wrapperContainer.addEventListener('touchstart', function (event) {
+							openChatWindow(event);
+						});
+						var wrapper = document.createElement('div');
+						wrapper.setAttribute('class', 'wrapper');
+
+						var wrapperOverlay = document.createElement('div');
+						wrapperOverlay.setAttribute('class', 'wrapper-overlay');
+
+						var widgetToggleIcon = document.createElement('img');
+						widgetToggleIcon.setAttribute('tabindex', '0');
+						widgetToggleIcon.setAttribute('id', 'q-icon');
+						widgetToggleIcon.setAttribute('aria-label', 'open chat window');
+
+						var closeIcon = document.createElement('img');
+						closeIcon.setAttribute('id', 'close-icon');
+						widgetToggleIcon.src = this.storageUrl.concat('/chat-icon-white.svg');
+
+						closeIcon.setAttribute('aria-label', 'minimize chat window');
+						closeIcon.setAttribute('tabindex', '0');
+						closeIcon.src = this.storageUrl.concat('/minimize.svg');
+						this._createWrapperFloatMessage(wrapperContainer);
+
+						wrapperContainer.appendChild(wrapperOverlay);
+						wrapperContainer.appendChild(wrapper);
+						this.shadow.appendChild(wrapperContainer);
+						wrapper.appendChild(widgetToggleIcon);
+						wrapper.appendChild(closeIcon);
+
+
+					}
+				},
+				{
+					key: '_createWrapperFloatMessage',
+					value: function _createWrapperFloatMessage(wrapperContainer) {
+						let _this = this;
+						var wrapperMsgContainer = document.createElement('div');
+						var shadowDemo = document.querySelector('#shadow');
+						var botBgColor = shadowDemo.getAttribute('bot-message-bg-color');
+						wrapperMsgContainer.style.setProperty(
+							'--bot-message-bg',
+							botBgColor
+						);
+						wrapperMsgContainer.setAttribute('class', 'wrapper-msg-container');
+						var wrapperMsg = document.createElement('div');
+						wrapperMsg.setAttribute('class', 'wrapper-message');
+						var wrapperText =
+							getCookieValue('languageCode') === 'es'
+								? 'Chat with CTA'
+								: 'Chat with CTA';
+						wrapperMsg.innerHTML = wrapperText;
+						wrapperMsg.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+						wrapperMsgContainer.addEventListener('click', function (event) {
+							openChatWindow(event);
+						});
+
+						var closeBtnContainer = document.createElement('div');
+						closeBtnContainer.classList.add(
+							'close-btn-container',
+							'btn-animate-hover'
+						);
+						var closeBtn = document.createElement('img');
+						closeBtn.setAttribute('id', 'close-btn');
+						closeBtn.setAttribute('aria-label', 'minimize chat window');
+						closeBtn.src = this.storageUrl.concat("/close-white.svg");
+						closeBtn.setAttribute('style', 'margin-top:-150%');
+						closeBtnContainer.appendChild(closeBtn);
+						wrapperContainer.appendChild(wrapperMsgContainer);
+						wrapperMsgContainer.appendChild(closeBtnContainer);
+						closeBtnContainer.addEventListener('click', function (event) {
+							wrapperMsgContainer.style.animation = 'fade 2s linear';
+							wrapperMsgContainer.style.opacity = '0';
+							wrapperMsgContainer.style.display = 'none';
+							event.stopPropagation();
+						});
+						closeBtnContainer.addEventListener('keydown', function (event) {
+							if (event.key === 'Enter' || event.code === 'Space') {
+								wrapperMsgContainer.style.animation = 'fade 2s linear';
+								wrapperMsgContainer.style.opacity = '0';
+								wrapperMsgContainer.style.display = 'none';
+								event.stopPropagation();
+							}
+						});
+					}
+				},
+				{
+					key: '_createChatWindow',
+					value: function _createChatWindow() {
+						var chatWindow = document.createElement('div');
+						chatWindow.setAttribute('class', 'chat-window');
+						chatWindow.setAttribute('opened', 'false');
+						chatWindow.setAttribute('role', 'dialog');
+						chatWindow.setAttribute('aria-modal', 'true');
+						chatWindow.setAttribute('aria-labelledby', 'widget-title')
+						chatWindow.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+
+
+						this._createChatTitle(chatWindow);
+
+						this._createChatMessages(chatWindow);
+
+						this._createChatFooter(chatWindow);
+
+						this.shadow.appendChild(chatWindow);
+					}
+				},
+				{
+					key: '_createChatTitle',
+					value: function _createChatTitle(chatWindow) {
+						let _this = this;
+						var chatTitle = document.createElement('div');
+						chatTitle.setAttribute('class', 'chat-title');
+						chatTitle.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+						var buttonsContainer = document.createElement('div');
+						buttonsContainer.setAttribute('class', 'buttons-container');
+						var refreshIconContainer = document.createElement('div');
+						refreshIconContainer.classList.add('btn-animate-hover');
+						var refreshButton = document.createElement('img');
+						refreshButton.classList.add('refresh-button');
+						refreshButton.classList.add('header-button');
+						refreshButton.setAttribute('aria-label', 'refresh chat session');
+						refreshButton.setAttribute('tabindex', '0');
+						refreshButton.src = this.storageUrl.concat('/refresh.svg');
+
+						refreshIconContainer.onclick = confirmSessionRefresh;
+						refreshIconContainer.addEventListener('keydown', function (event) {
+							// Check if the Enter key is pressed
+							if (event.key === 'Enter' || event.code === 'Space') {
+								confirmSessionRefresh();
+							}
+						});
+						setTimeout(function () {
+							var shadowDemo = document.querySelector('#shadow');
+							var leftTitleContainer = document.createElement('div');
+							leftTitleContainer.setAttribute('class', 'left-title-container');
+							var chatTitleText = shadowDemo.getAttribute('chat-title');
+							var titleColor = shadowDemo.getAttribute('chat-title-color');
+							var botBgColor = shadowDemo.getAttribute('bot-message-bg-color');
+							var botFontColor = shadowDemo.getAttribute('chat-bot-font-color');
+							var widgetTitle = document.createElement('div');
+							widgetTitle.setAttribute('class', 'widget-title');
+							widgetTitle.setAttribute('id', 'widget-title');
+							var botLogo = document.createElement('img');
+							botLogo.setAttribute('id', 'chatbot-logo');
+							botLogo.setAttribute('aria-label', 'chatbot logo');
+							botLogo.src = storageUrl.concat("/cta-logo.png");
+							botLogo.style.setProperty("width", "17%");
+							botLogo.style.setProperty("margin-top", "1px");
+
+							var title = shadow.shadowRoot.querySelector('.chat-title');
+							var wrapper = shadow.shadowRoot.querySelector('.wrapper');
+							var botMessage = shadow.shadowRoot.querySelector('.bot-message');
+							widgetTitle.innerText = chatTitleText;
+							leftTitleContainer.appendChild(botLogo);
+
+							var closeIconContainer = document.createElement('div');
+							closeIconContainer.classList.add('btn-animate-hover');
+							var close = document.createElement('img');
+							close.classList.add('header-button');
+							close.setAttribute('aria-label', 'minimize chat window');
+							close.setAttribute('tabindex', '0');
+							close.src = this.storageUrl.concat("/minimize.svg");
+							close.style.setProperty("width", "80%");
+
+							closeIconContainer.addEventListener('click', function (event) {
+								openChatWindow(event);
+							});
+							closeIconContainer.addEventListener('keydown', function (event) {
+								if (event.key === 'Enter' || event.code === 'Space') {
+									openChatWindow(event);
+								}
+							});
+							// wrapper.addEventListener("click",openChatWindow);
+							var languageContainer = document.createElement('div');
+							languageContainer.classList.add(
+								'language-container',
+								'btn-animate-hover'
+							);
+
+							languageContainer.onclick = confirmLanguageChange;
+							refreshIconContainer.appendChild(refreshButton);
+							closeIconContainer.appendChild(close);
+
+
+							buttonsContainer.appendChild(refreshIconContainer);
+							buttonsContainer.appendChild(closeIconContainer);
+							leftTitleContainer.appendChild(widgetTitle);
+							title.appendChild(leftTitleContainer);
+							title.appendChild(buttonsContainer);
+							title.style.backgroundColor = '#0c2747';
+							wrapper.style.setProperty('--chat-title-color', titleColor);
+
+							if (shadowDemo.querySelector('.bot-message') !== null) {
+								botMessage.style.setProperty('--bot-message-bg', botBgColor);
+								botMessage.style.setProperty(
+									'--bot-message-font-color',
+									botFontColor
+								);
+							}
+						}, 0);
+						chatWindow.appendChild(chatTitle);
+
+						var languageDiv = document.createElement('div');
+						languageDiv.setAttribute('id', 'language-div');
+						languageDiv.setAttribute('style', 'display:flex;flex-wrap:wrap;padding:0.2rem;justify-content:center;align-items:center;background-color:#e5e5e5');
+
+						// Array of language information
+						languages = [
+							{ title: 'English', style: 'cursor: pointer;margin-left:0.1rem;margin-top:0.2rem;margin-right:1rem;font-size:16px;color:#2166B1;font-weight:bold', value: 'en-us' },
+							{ title: 'Español', style: 'cursor: pointer;margin-left:0.1rem;margin-top:0.2rem;margin-right:1rem;font-size:16px;color:#2166B1;', value: 'es-us' },
+							{ title: 'Polski', style: 'cursor: pointer;margin-left:0.1rem;margin-top:0.2rem;margin-right:1rem;font-size:16px;color:#2166B1;', value: 'pl' },
+							{ title: 'Filipino', style: 'cursor: pointer;margin-left:0.1rem;margin-top:0.2rem;margin-right:1rem;font-size:16px;color:#2166B1;', value: 'fil' },
+							{ title: '简体中文', style: 'cursor: pointer;margin-left:0.1rem;margin-top:0.2rem;margin-right:1rem;font-size:16px;color:#2166B1;', value: 'zh-cn' }
+						];
+						let url = ''.concat(
+							this.integrationServiceDomain,
+							'/api/v1/language/fetch-language'
+						);
+						let authHeader = btoa(
+							''.concat(atob(_this.userName), ':').concat(atob(_this.password))
+						);
+
+						fetch(`${url}`, {
+							method: 'GET',
+							headers: {
+								'Content-Type': 'application/json', // Set the appropriate content type if needed
+								"ngrok-skip-browser-warning": "69420",
+								"Authorization": "Basic " + authHeader
+							},
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error('Network response was not ok');
+								}
+								return response.json();
+							}).then((data) => {
+								const apiResponse = data.data
+								// Update titles based on API response
+								for (var key in apiResponse) {
+									var language = languages.find(lang => lang.value === key);
+									if (language) {
+										language.title = apiResponse[key].title.trim();
+										language.message = apiResponse[key].message;
+									}
+								}
+								addLanguage(languages)
+							})
+
+						// Event handler function
+						function languageClickHandler(event, disableRefresh) {
+							if(!chatApiInProgressFlag) {
+								// Reset all languages to normal font weight
+								languages.forEach(function (language) {
+									language.anchor.style.fontWeight = 'normal';
+								});
+		
+								// Make the clicked language bold
+								var clickedLanguage = languages.find(function (language) {
+									return language.anchor === event.target;
+								});
+		
+								if (clickedLanguage) {
+									clickedLanguage.anchor.style.fontWeight = 'bold';
+								}
+								setCookie('languageCode', clickedLanguage.value);
+								if(disableRefresh !== true) {
+									document.documentElement.setAttribute('lang', clickedLanguage.value);
+								}
+								if (!disableRefresh) {
+									var welcomeMsg =
+										setTimeout(function () {
+											shadow._refreshSession(false);
+										}, 0);
+								}
+							}
+
+						}
+						function addLanguage(languages) {
+							languages.forEach(function (language) {
+								var span = document.createElement('span');
+								span.setAttribute('style', 'display:flex;');
+
+								var a = document.createElement('a');
+								a.setAttribute('title', language.title);
+								a.setAttribute('tabindex', '0');
+								a.setAttribute('style', language.style);
+								a.setAttribute('lang', language.value);
+								a.textContent = language.title;
+
+								a.addEventListener('click', languageClickHandler);
+								a.addEventListener('keydown', (e) => {
+									if (e.key === 'Enter') {
+										languageClickHandler(e)
+									}
+								});
+								// Append the anchor element to the span
+								span.appendChild(a);
+
+								// Append the span element to the main container div
+								languageDiv.appendChild(span);
+
+								language.anchor = a;
+
+							});
+							var secondDiv = chatWindow.children[1];
+              
+							chatWindow.insertBefore(languageDiv, secondDiv);
+
+						}
+						// Iterate through the languages array and create spans for each language
+						setTimeout(() => {
+							if (getCookieValue('languageCode')) {
+								let wer = languages.find((x) => {
+									return x.value === getCookieValue('languageCode')
+								})
+								var allAnchors = languageDiv.querySelectorAll('a');
+
+								// Iterate through the anchor tags to find the one with the specified value
+								for (var i = 0; i < allAnchors.length; i++) {
+									var anchor = allAnchors[i];
+									anchor.style.fontWeight = 'normal';
+									if (anchor.innerHTML === wer.title) {
+										anchor.style.fontWeight = 'bold';
+										return anchor;
+									}
+								}
+							}
+						}, 1500)
+
+					}
+				},
+				{
+					key: '_createChatMessages',
+					value: function _createChatMessages(chatWindow) {
+						var chatMessages = document.createElement('div');
+						chatMessages.setAttribute('class', 'chat-messages');
+						// chatMessages.style.setProperty('color', '##FF0000');
+						var messagesContainer = document.createElement('div');
+						messagesContainer.setAttribute('class', 'message-container');
+						var scrollDownContainer = document.createElement('div');
+						scrollDownContainer.classList.add(
+							'btn-animate-hover',
+							'scroll-down'
+						);
+						var scrollDown = document.createElement('img');
+						scrollDown.setAttribute('aria-label', 'scroll to bottom');
+						scrollDown.src = this.storageUrl.concat('/down-arrow.svg');
+						scrollDownContainer.appendChild(scrollDown);
+						scrollDownContainer.onclick = scrollAtBottom;
+						var userId = sessionStorage.getItem('user-id'); // Starting point for hitting hi msg internally or to show chat history.
+
+						if (userId) {
+							var url = ''
+								.concat(
+									this.integrationServiceDomain,
+									'/api/v1/messages/chat-history/'
+								)
+								.concat(encodeURI(userId));
+							// var url = "";
+							var self = this;
+							var authHeader = btoa(
+								''.concat(atob(this.userName), ':').concat(atob(this.password))
+							);
+							setTimeout(function () {
+								self._requestHandler(
+									'GET',
+									url,
+									{},
+									self._showChatHistory,
+									authHeader
+								);
+							}, 0);
+						} 
+						messagesContainer.appendChild(scrollDownContainer);
+						chatWindow.appendChild(chatMessages);
+						chatMessages.appendChild(messagesContainer);
+					}
+				},
+				{
+					key: '_appendBotMessages',
+					value: function _appendBotMessages(messagesContainer, botMessage) {
+						var _this2 = this;
+						let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+
+						if (botMessage) {
+							var botMessageDiv = document.createElement('div');
+							botMessageDiv.lang = selectedLanguage;
+							botMessageDiv.innerText = botMessage;
+							botMessageDiv.setAttribute('class', 'bot-loading-messages');
+							var outerMessageContainer = document.createElement('div');
+							outerMessageContainer.classList.add(
+								'outer-bot-message-container',
+								'loading',
+								'multiple-message-container'
+							);
+
+							outerMessageContainer.appendChild(botMessageDiv);
+
+							if (botMessageDiv) {
+								var shadowDemo = document.querySelector('#shadow');
+
+								if (shadowDemo !== null) {
+									var botBgColor = shadowDemo.getAttribute(
+										'bot-message-bg-color'
+									);
+									var botFontColor = shadowDemo.getAttribute(
+										'chat-bot-font-color'
+									);
+									botMessageDiv.style.setProperty(
+										'--bot-message-bg',
+										botBgColor
+									);
+									botMessageDiv.style.setProperty(
+										'--bot-message-font-color',
+										botFontColor
+									);
+								}
+							}
+
+							if (botMessage === '.') {
+								botMessageDiv.style.animation =
+									'dots 1s steps(5, end) infinite';
+								botMessageDiv.style.paddingRight = '1.5rem';
+							}
+
+							messagesContainer.appendChild(outerMessageContainer);
+							outerMessageContainer.scrollIntoView({
+								behavior: 'smooth',
+								block: 'end',
+								inline: 'nearest'
+							});
+						} else {
+							let userWelcomeMsgArray = [
+								{ welcomeMsgText: 'hi', value: 'en-us' },
+								{ welcomeMsgText: 'hola', value: 'es-us' },
+								{ welcomeMsgText: 'hej', value: 'pl' },
+								{ welcomeMsgText: 'hi', value: 'fil' },
+								{ welcomeMsgText: '你好', value: 'zh-cn' }
+							];
+
+							let welcomeMsg = userWelcomeMsgArray.filter((msg) => msg.value == getCookieValue('languageCode'));
+							if(welcomeMsg.length) {
+								welcomeMsg = welcomeMsg[0].welcomeMsgText;
+							}
+							else {
+								welcomeMsg = "hi";
+							}
+							setTimeout(function () {
+								_this2._webhookApi(welcomeMsg, false, 'newSession');
+							}, 0);
+						}
+					}
+				},
+				{
+					key: '_createChatFooter',
+					value: function _createChatFooter(chatWindow) {
+						var messagesContainer = chatWindow.querySelector(
+							'.message-container'
+						);
+						var chatFooter = document.createElement('div');
+						chatFooter.setAttribute('class', 'chat-footer');
+
+						this._createChatInput(chatFooter, messagesContainer);
+
+						chatWindow.appendChild(chatFooter);
+					}
+				},
+				{
+					key: '_createChatInput',
+					value: function _createChatInput(chatFooter, messagesContainer) {
+
+						let placeholderLanguageMapping = [
+							{ placeholderText: 'Type your message', value: 'en-us' },
+							{ placeholderText: 'Escriba su mensaje', value: 'es-us' },
+							{ placeholderText: 'Wpisz wiadomość', value: 'pl' },
+							{ placeholderText: 'I-type ang mensahe mo', value: 'fil' },
+							{ placeholderText: '输入您的消息', value: 'zh-cn' }
+						];
+
+						let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+						let placeholderLanguageText = placeholderLanguageMapping.filter((langObj) => langObj.value == selectedLanguage);
+						if(placeholderLanguageText && placeholderLanguageText[0]) {
+							placeholderLanguageText = placeholderLanguageText[0];
+						}
+						else {
+							placeholderLanguageText = placeholderLanguageMapping[0];
+						}
+
+						var chatInput = document.createElement('input');
+						chatInput.setAttribute('class', 'chat-input');
+						chatInput.setAttribute('type', 'text');
+						chatInput.setAttribute('tabindex', '0');
+						chatInput.lang = selectedLanguage;
+						chatInput.setAttribute('placeholder', placeholderLanguageText.placeholderText);
+						chatInput.setAttribute('maxlength', '255');
+						chatInput.style.fontSize = '16px'; // Set font size to 16px
+						chatInput.style.setProperty('--placeholder-font-size', '16px'); // Set font size of placeholder text
+
+						var chatSendButton = document.createElement('img');
+						chatSendButton.setAttribute('class', 'chat-send-button');
+						chatSendButton.setAttribute('aria-label', 'send message');
+						chatSendButton.setAttribute('tabindex', '0');
+						chatSendButton.style.fontSize = '16px'; // Set font size to 16px
+
+						chatSendButton.src = this.storageUrl.concat('/blue-send.svg');
+						var chatDisabledSendButton = document.createElement('img');
+						chatDisabledSendButton.setAttribute(
+							'class',
+							'chat-disabled-send-button'
+						);
+						chatDisabledSendButton.setAttribute('aria-label', 'send message disabled button');
+						chatDisabledSendButton.src = this.storageUrl.concat('/gray-send.svg');
+						chatSendButton.onclick = this._sendMessage.bind(this);
+						chatSendButton.addEventListener('click', event => {
+							this._sendMessage.bind(this)();
+						});
+
+						chatSendButton.addEventListener('keydown', event => {
+							// Check if the key pressed is Tab
+							if (event.key === 'Tab') {
+								// Prevent the default behavior for Tab key
+								event.preventDefault();
+							} else {
+								// Handle other keydown events
+								this._sendMessage.bind(this)();
+							}
+						});
+
+						this._inputListener(
+							chatInput,
+							chatSendButton,
+							chatDisabledSendButton,
+							false
+						);
+
+						chatFooter.appendChild(chatInput);
+						chatFooter.appendChild(chatSendButton);
+						chatFooter.appendChild(chatDisabledSendButton);
+					}
+				},
+				{
+					key: '_sendMessage',
+					value: function _sendMessage(customParameter) {
+						customParameter =
+							customParameter && customParameter.currentTarget
+								? null
+								: customParameter;
+						var chatInput = this.shadow.querySelector('.chat-input');
+						let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+
+						if (chatInput.value.trim()) {
+							var chatSendButton = this.shadow.querySelector(
+								'.chat-send-button'
+							);
+							var chatDisabledSendButton = this.shadow.querySelector(
+								'.chat-disabled-send-button'
+							);
+							var messagesContainer = this.shadow.querySelector(
+								'.message-container'
+							);
+							var messageText = chatInput.value;
+
+							if (!this.addrSelected && this.addrSuggestionShown) {
+								var firstAddress = null;
+
+								if (
+									this.addressCandidates &&
+									this.shadow.querySelector('.suggestion-dropdown') &&
+									this.addressCandidates.length
+								) {
+									firstAddress = this.addressCandidates[0];
+								}
+
+								messageText =
+									(firstAddress && firstAddress.address) || messageText;
+								customParameter =
+									(firstAddress && firstAddress.customLocation) || {};
+							} // remove address suggestions
+
+							if (this.shadow.querySelector('.suggestion-dropdown')) {
+								this.shadow.querySelector('.suggestion-dropdown').remove();
+							}
+
+							if (this.shadow.querySelector('.custom-dropdown')) {
+								this.shadow.querySelector('.custom-dropdown').remove();
+							}
+
+							this.addrSuggestionShown = false;
+							var userMessageContainer = document.createElement('div');
+							userMessageContainer.setAttribute(
+								'class',
+								'user-message-container'
+							);
+							var outerMessageContainer = document.createElement('div');
+							outerMessageContainer.setAttribute(
+								'class',
+								'outer-user-message-container'
+							);
+							var userMessage = document.createElement('div');
+							userMessage.lang = selectedLanguage;
+							userMessage.innerText = messageText;
+							userMessage.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+							var timeDiv = document.createElement('div');
+							timeDiv.setAttribute('class', 'time-div');
+							timeDiv.lang = selectedLanguage;
+							timeDiv.innerHTML = getFormattedDateTime(new Date());
+							userMessageContainer.appendChild(userMessage);
+							userMessageContainer.appendChild(timeDiv);
+							outerMessageContainer.appendChild(userMessageContainer);
+							messagesContainer.appendChild(outerMessageContainer);
+							userMessage.setAttribute('class', 'user-message');
+							outerMessageContainer.scrollIntoView({
+								behavior: 'smooth',
+								block: 'end',
+								inline: 'nearest'
+							});
+							chatInput.value = '';
+							chatSendButton.style.display = 'none';
+							chatDisabledSendButton.style.display = 'block';
+
+							this._webhookApi(messageText, false, 'followupIntent', customParameter);
+
+							var shadowDemo = document.querySelector('#shadow');
+							var userBgColor = shadowDemo.getAttribute(
+								'user-message-bg-color'
+							);
+							var userFontColor = shadowDemo.getAttribute(
+								'chat-user-font-color'
+							);
+							userMessage.style.setProperty('--user-message-bg', userBgColor);
+							userMessage.style.setProperty(
+								'--user-message-font-color',
+								userFontColor
+							);
+							chatInput.removeEventListener('keyup', this._suggestAddress);
+							chatInput.removeEventListener('keyup', this._suggestKeywords);
+							chatInput.focus();
+						}
+
+					}
+				},
+				{
+					key: '_suggestAddress',
+					value: function _suggestAddress() {
+						var street = this.value;
+						var shadow = document.querySelector('#shadow');
+						var authHeader = btoa(
+							''
+								.concat(atob(shadow.userName), ':')
+								.concat(atob(shadow.password))
+						);
+
+						if (
+							street.length > shadow.addressInputThreshold ||
+							!street.length
+						) {
+							clearTimeout(this.timeout);
+							var url = "";
+
+							this.timeout = setTimeout(function () {
+								shadow._requestHandler(
+									'GET',
+									url,
+									{
+										flag: 'suggestAddress'
+									},
+									handleSuggestions,
+									authHeader
+								);
+							}, 250);
+						}
+					}
+				},
+				{
+					key: '_suggestKeywords',
+					value: function _suggestKeywords() {
+						var keyword = this.value.trim();
+						var shadow = document.querySelector('#shadow');
+						var authHeader = btoa(
+							''
+								.concat(atob(shadow.userName), ':')
+								.concat(atob(shadow.password))
+						);
+						clearTimeout(this.timeout);
+						var url = "";
+						this.timeout = setTimeout(function () {
+							shadow._requestHandler(
+								'GET',
+								url,
+								{
+									flag: 'suggestKeyword'
+								},
+								handleSuggestions,
+								authHeader
+							);
+						}, 250);
+					}
+				},
+				{
+					key: '_inputListener',
+					value: function _inputListener(
+						chatInput,
+						chatSendButton,
+						chatDisabledSendButton,
+						flag
+					) {
+						var _this3 = this;
+
+						if (flag === false) {
+							chatInput.addEventListener('keyup', function (event) {
+								if (event.keyCode === 13) {
+									_this3._sendMessage();
+								}
+
+								if (event.target.value.trim()) {
+									chatSendButton.style.display = 'block';
+									chatDisabledSendButton.style.display = 'none';
+								} else {
+									chatSendButton.style.display = 'none';
+									chatDisabledSendButton.style.display = 'block';
+								}
+							});
+						} else if (flag === true) {
+							if (chatInput.value) {
+								chatSendButton.style.display = 'block';
+								chatDisabledSendButton.style.display = 'none';
+							} else {
+								chatSendButton.style.display = 'none';
+								chatDisabledSendButton.style.display = 'block';
+							}
+						}
+					}
+				},
+				{
+					key: '_webhookApi',
+					value: function _webhookApi(message, isNewSession, dataLayerEvent, customParams) {
+						var _this4 = this;
+
+						chatApiInProgressFlag = true;
+						customParams = customParams || {};
+						isNewSession = isNewSession || false;
+						dataLayerEvent = dataLayerEvent || '';
+						message = message.trim();
+						var url = ''.concat(
+							this.integrationServiceDomain,
+							'/api/v1/dialogflow/detect-intent'
+						);
+						this.userId = sessionStorage.getItem('user-id');
+						var languageArr = ['english'];
+						var languageCode = getCookieValue('languageCode') || 'en-us';
+						var date = new Date();
+						var timezoneOffset = date.getTimezoneOffset();
+						var customParameters = Object.assign(customParams, {
+							timezoneOffset: timezoneOffset
+						});
+
+						if (languageArr.includes(message.toLowerCase())) {
+							isNewSession = this.languageCodeMap[message] !== languageCode;
+
+							if (isNewSession) {
+								confirmLanguageChange();
+								return;
+							}
+						}
+
+						if (!this.userId || isNewSession) {
+							this.userId = uuidv4();
+							sessionStorage.setItem('user-id', this.userId);
+						}
+
+						var body = {
+							message: message,
+							userId: this.userId,
+							languageCode: languageCode,
+							isNewSession: isNewSession || false,
+							customParams: customParameters
+						};
+						var authHeader = btoa(
+							''.concat(atob(this.userName), ':').concat(atob(this.password))
+						);
+						var Http = new XMLHttpRequest();
+						Http.open('POST', url, true);
+						Http.setRequestHeader(
+							'content-type',
+							'application/json; charset=UTF-8'
+						);
+						Http.setRequestHeader('Authorization', 'Basic '.concat(authHeader));
+						Http.send(JSON.stringify(body));
+						Http.responseType = 'json';
+						var messagesContainer = this.shadow.querySelector(
+							'.message-container'
+						);
+
+						this._appendBotMessages(messagesContainer, '.');
+
+						// Trigger an event for welcome message datalayer event
+						if (dataLayerEvent == 'newSession') {
+							window.dataLayer = window.dataLayer || [];
+							window.dataLayer.push({
+								'event': 'chatbot',
+								'action': 'conversation_started',
+								'sessionId': this.userId,
+								'sessionStartTime': date
+							});
+							// set cookie value for time start
+							setCookie('sessionStartTime', new Date());
+						}
+
+						messagesContainer.scrollTop = messagesContainer.scrollHeight;
+						messagesContainer
+							.querySelectorAll('.removable')
+							.forEach(function (ele) {
+								ele.style.opacity = '0';
+								setTimeout(function () {
+									ele.remove();
+								}, 1);
+							});
+
+						Http.onreadystatechange = function (e) {
+							if (Http.response && Http.response.data) {
+								_this4._showChatMessages(
+									Http.response.data,
+									undefined,
+									'apiResponse'
+								);
+
+								// Function to calculate the time difference in milliseconds
+								function getTimeDifference(startDate) {
+									var currentDate = new Date();
+									var timeDiff = currentDate - new Date(startDate); // difference in milliseconds
+									return timeDiff;
+								}
+
+								// Trigger an event for every intent match for datalayer event
+								if (Http.response.data.queryResult?.intent?.displayName || dataLayerEvent == "followupIntent") {
+									var sessionStartDate = getCookieValue('sessionStartTime');
+									var timeDifference = getTimeDifference(sessionStartDate);
+									const timeDifferenceSeconds = Math.floor(timeDifference / 1000);
+
+									window.dataLayer = window.dataLayer || [];
+									window.dataLayer.push({
+										'event': 'chatbot',
+										'action': 'intent_matched',
+										'intentName': Http.response.data.queryResult?.intent?.displayName || '',
+										'languageCode': Http.response.data.queryResult?.languageCode || '',
+										'userQuery': Http.response.data.queryResult?.text || '',
+										'sessionStartTimeDifferenceSeconds': timeDifferenceSeconds || 0,
+										'sessionId': Http.response.data.queryResult?.diagnosticInfo?.fields && Http.response.data.queryResult?.diagnosticInfo?.fields['Session Id']?.stringValue || ''
+									});
+								}
+							}
+						};
+					}
+				},
+				{
+					key: '_showChatHistory',
+					value: function _showChatHistory(response, self, flag) {
+						flag = flag || '';
+						var messagesContainer = self.shadow.querySelector(
+							'.message-container'
+						);
+
+						if (response && response.length) {
+							let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+							response.forEach(function (value, index) {
+								const CreatedAt = new Date(value.createdAt._seconds * 1000 + value.createdAt._nanoseconds / 1e6);
+								var isLastMessage = response.length - 1 === index;
+
+								if (value.queryResult.text) {
+									if (flag === 'downloadHistory') {
+										self.chatHistory += 'Resident: '
+											.concat(value.queryResult.text, ' \n')
+											.concat(getFormattedDateTime(new Date(CreatedAt) || ''), ' \n\n');
+
+										self._showChatMessages(value, isLastMessage, flag);
+
+										if (isLastMessage) {
+											var shadowDemo = document.querySelector('#shadow')
+												.shadowRoot;
+											var downloadLink = shadowDemo.querySelector(
+												'#download_link'
+											);
+											var history = self.chatHistory;
+											var data = new Blob([history], {
+												type: 'text/plain'
+											});
+											var url = window.URL.createObjectURL(data);
+											downloadLink.href = url;
+											self.chatHistory = '';
+										}
+									} else {
+										var userMessageContainer = document.createElement('div');
+										userMessageContainer.setAttribute(
+											'class',
+											'user-message-container'
+										);
+										var userMessage = document.createElement('div');
+										var outerMessageContainer = document.createElement('div');
+										outerMessageContainer.setAttribute(
+											'class',
+											'outer-user-message-container'
+										);
+										var timeDiv = document.createElement('div');
+										timeDiv.setAttribute('class', 'time-div');
+										timeDiv.lang = selectedLanguage;
+										timeDiv.innerHTML = getFormattedDateTime(
+											new Date(CreatedAt)
+										);
+										userMessage.lang = selectedLanguage;
+										userMessage.innerText = value.queryResult.text;
+										userMessage.setAttribute('class', 'user-message');
+										var userBgColor = self.getAttribute(
+											'user-message-bg-color'
+										);
+										userMessage.style.setProperty(
+											'--user-message-bg',
+											userBgColor
+										);
+										var userFontColor = self.getAttribute(
+											'chat-user-font-color'
+										);
+										userMessage.style.setProperty(
+											'--user-message-font-color',
+											userFontColor
+										);
+
+										if (userMessage.innerText) {
+											let userWelcomeMsgArray = [
+												{ welcomeMsgText: 'hi', value: 'en-us' },
+												{ welcomeMsgText: 'hola', value: 'es-us' },
+												{ welcomeMsgText: 'hej', value: 'pl' },
+												{ welcomeMsgText: 'hi', value: 'fil' },
+												{ welcomeMsgText: '你好', value: 'zh-cn' }
+											];
+											if (!(((userWelcomeMsgArray.map((msg) => msg.welcomeMsgText).includes(userMessage.innerText.trim())) && index === 0) || userMessage.innerText.trim() === 'sessionExpiry')) {
+												userMessageContainer.appendChild(userMessage);
+												userMessageContainer.appendChild(timeDiv);
+												outerMessageContainer.appendChild(userMessageContainer);
+												messagesContainer.appendChild(outerMessageContainer);
+											}
+										}
+
+										self._showChatMessages(value, isLastMessage, 'chatHistory');
+
+										messagesContainer.scrollTop =
+											messagesContainer.scrollHeight;
+									}
+								}
+							});
+						} else {
+							self._appendBotMessages(messagesContainer);
+						}
+					}
+				},
+				{
+					key: '_showChatMessages',
+					value: function _showChatMessages(response, isLastMessage, flag) {
+						var _this5 = this;
+
+						chatApiInProgressFlag = false;
+						flag = flag || '';
+						var messageContainer = this.shadow.querySelector(
+							'.message-container'
+						);
+						if (response.queryResult.intent) {
+							let intentName = response.queryResult.intent.displayName;
+							let disablePayload = response?.queryResult?.responseMessages[2]?.payload?.fields?.richContent?.listValue?.values[0]?.listValue?.values[0]?.structValue?.fields
+							let disablePayloadType = disablePayload?.type?.stringValue
+							let disablePayloadvalue = disablePayload?.value?.boolValue
+							let chatWindow = shadow.shadowRoot.querySelector('.chat-window');
+							let chatInput = chatWindow.querySelector('.chat-footer').querySelector('.chat-input');
+
+							let placeholderLanguageMapping = [
+								{ welcomePlaceholderText: 'Select an option above', placeholderText: 'Type your message', value: 'en-us' },
+								{ welcomePlaceholderText: 'Seleccione una opción arriba', placeholderText: 'Escriba su mensaje', value: 'es-us' },
+								{ welcomePlaceholderText: 'Wybierz opcję powyżej', placeholderText: 'Wpisz wiadomość', value: 'pl' },
+								{ welcomePlaceholderText: 'Pumili ng opsyon sa itaas', placeholderText: 'I-type ang mensahe mo', value: 'fil' },
+								{ welcomePlaceholderText: '请从上方选择一个选项', placeholderText: '输入您的消息', value: 'zh-cn' }
+							];
+
+							let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+							let placeholderLanguageText = placeholderLanguageMapping.filter((langObj) => langObj.value == selectedLanguage);
+							if(placeholderLanguageText && placeholderLanguageText[0]) {
+								placeholderLanguageText = placeholderLanguageText[0];
+							}
+							else {
+								placeholderLanguageText = placeholderLanguageMapping[0];
+							}
+
+							chatInput.lang = selectedLanguage;
+							if (intentName === 'Default Welcome Intent' || (disablePayloadType === 'disable_text_input' && disablePayloadvalue)) {
+								chatInput.setAttribute('disabled', 'true')
+								chatInput.placeholder = placeholderLanguageText.welcomePlaceholderText;
+								chatInput.style.opacity = '0.5'; // Adjust the opacity value as needed
+								chatWindow.querySelector('.chat-send-button').style.display = 'none';
+								chatWindow.querySelector('.chat-disabled-send-button').style.display = 'block';
+							} else {
+								chatInput.removeAttribute("disabled");
+								chatInput.style.opacity = '1'; // Adjust the opacity value as needed
+								chatInput.placeholder = placeholderLanguageText.placeholderText;
+							}
+							intentName === 'Session Expiry' &&
+								flag === 'apiResponse' &&
+								this._refreshSession(false, false);
+						}
+
+						var fulfillmentMessage = response.queryResult.responseMessages;
+						if (fulfillmentMessage && fulfillmentMessage.length) {
+							var multipleMessageContainer = document.createElement('div');
+
+							fulfillmentMessage = fulfillmentMessage.filter(obj => {
+								return !obj.hasOwnProperty('message') || !obj.hasOwnProperty('endInteraction');
+							});
+							fulfillmentMessage.forEach(function (message, i) {
+								if (message && message.payload) {
+									var autoSuggestAddress =
+										message.payload.fields &&
+										message.payload.fields.autoSuggestAddress &&
+										message.payload.fields.autoSuggestAddress.boolValue;
+									var autoSuggestKeywords =
+										message.payload.fields &&
+										message.payload.fields.autoSuggestServiceType &&
+										message.payload.fields.autoSuggestServiceType.boolValue;
+
+									if (
+										autoSuggestAddress &&
+										((flag === 'chatHistory' && isLastMessage) ||
+											flag === 'apiResponse')
+									) {
+										_this5.addrSuggestionShown = true;
+
+										_this5._attachInputEventListener(_this5._suggestAddress);
+
+										return;
+									}
+
+									if (
+										autoSuggestKeywords &&
+										((flag === 'chatHistory' && isLastMessage) ||
+											flag === 'apiResponse')
+									) {
+										_this5.autoSuggestionShown = true;
+
+										_this5._attachInputEventListener(_this5._suggestKeywords);
+
+										return;
+									}
+
+									var fields =
+										(message.payload.fields &&
+											message.payload.fields.richContent &&
+											message.payload.fields.richContent.listValue &&
+											message.payload.fields.richContent.listValue.values &&
+											message.payload.fields.richContent.listValue.values[0]
+												.listValue &&
+											message.payload.fields.richContent.listValue.values[0]
+												.listValue.values &&
+											message.payload.fields.richContent.listValue.values[0]
+												.listValue.values[0].structValue &&
+											message.payload.fields.richContent.listValue.values[0]
+												.listValue.values[0].structValue.fields) ||
+										'';
+									var type =
+										(fields && fields.type && fields.type.stringValue) || '';
+									var hideTypes =
+										type === 'chips' || type === 'date' || type === 'time';
+									!(
+										(flag === 'chatHistory' || flag === 'downloadHistory') &&
+										hideTypes &&
+										!isLastMessage
+									) &&
+										_this5._renderCustomResponseType(
+											fields,
+											messageContainer,
+											fulfillmentMessage.length - 1 === i,
+											multipleMessageContainer,
+											{
+												response: response,
+												flag: flag,
+												isFirstMsg: i === 0
+											}
+										);
+								} else if (message && message.text) {
+									var botMessage =
+										message.text.text ||
+										(message.text.text &&
+											message.text.text.length &&
+											message.text.text[0]);
+
+									if (botMessage) {
+										var isLastMsg = fulfillmentMessage.length - 1 === i;
+
+										_this5._insertBotMessages(
+											botMessage,
+											messageContainer,
+											isLastMsg,
+											multipleMessageContainer,
+											{
+												response: response,
+												flag: flag,
+												isFirstMsg: i === 0
+											}
+										);
+									} else {
+										removeBotMessageContainer(messageContainer);
+									}
+								}
+							});
+						} else if (fulfillmentMessage && Object.keys(fulfillmentMessage).length) {
+							var multipleMessageContainer = document.createElement('div');
+
+
+							var fulfillmentMessages = [];
+							for (var i in fulfillmentMessage)
+								fulfillmentMessages.push([i, fulfillmentMessage[i]]);
+							fulfillmentMessages.forEach((message, i) => {
+								if (message && message[1].message === 'payload') {
+									var autoSuggestAddress =
+										message[1].payload.fields &&
+										message[1].payload.fields.autoSuggestAddress &&
+										message[1].payload.fields.autoSuggestAddress.boolValue;
+									var autoSuggestKeywords =
+										message[1].payload.fields &&
+										message[1].payload.fields.autoSuggestServiceType &&
+										message[1].payload.fields.autoSuggestServiceType.boolValue;
+
+									if (
+										autoSuggestAddress &&
+										((flag === 'chatHistory' && isLastMessage) ||
+											flag === 'apiResponse')
+									) {
+										_this5.addrSuggestionShown = true;
+
+										_this5._attachInputEventListener(_this5._suggestAddress);
+
+										return;
+									}
+
+									if (
+										autoSuggestKeywords &&
+										((flag === 'chatHistory' && isLastMessage) ||
+											flag === 'apiResponse')
+									) {
+										_this5.autoSuggestionShown = true;
+
+										_this5._attachInputEventListener(_this5._suggestKeywords);
+
+										return;
+									}
+									var fields = ({
+										options: message[1].payload.fields.richContent.listValue.values[0].listValue.values[0].structValue.fields.options,
+										type: message[1].payload.fields.richContent.listValue.values[0].listValue.values[0].structValue.fields.type,
+										dropdownType: message[1].payload.fields.richContent.listValue.values[0].listValue.values[0].structValue.fields.dropdownType
+									}) || '';
+									var type =
+										(message[1].payload.fields.richContent.listValue.values[0].listValue.values[0].structValue.fields.type.stringValue) || '';
+									var hideTypes =
+										type === 'chips' || type === 'date' || type === 'time' || type === 'searchable_dropdown';
+									(
+										(flag === 'chatHistory' || flag === 'downloadHistory') &&
+										hideTypes &&
+										isLastMessage
+									) &&
+										_this5._renderCustomResponseType(
+											fields,
+											messageContainer,
+											Object.keys(fulfillmentMessage).length - 1 === i,
+											multipleMessageContainer,
+											{
+												response: response,
+												flag: flag,
+												isFirstMsg: i === 0
+											}
+										);
+								} else if (message && message[1].message === 'text') {
+									var botMessage =
+										[message[1].text.text[0] ||
+											(message[1].text.text &&
+												message[1].text.text.length &&
+												message[1].text.text[0])];
+
+									if (botMessage) {
+										var isLastMsg = fulfillmentMessage.length - 1 === i;
+
+										_this5._insertBotMessages(
+											botMessage,
+											messageContainer,
+											isLastMsg,
+											multipleMessageContainer,
+											{
+												response: response,
+												flag: flag,
+												isFirstMsg: i === 0
+											}
+										);
+									} else {
+										removeBotMessageContainer(messageContainer);
+									}
+								}
+							});
+						}
+					}
+				},
+				{
+					key: '_insertBotMessages',
+					value: function _insertBotMessages(
+						botMessage,
+						messagesContainer,
+						isLastMsg,
+						multipleMessageContainer,
+						customObj
+					) {
+						let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+						isLastMsg = isLastMsg || false;
+						customObj = customObj || {};
+						var flag = customObj.flag || '';
+						let multiple = botMessage[0]?.split('<msg-break />')
+						multiple.forEach((message, i) => {
+							if (flag !== 'downloadHistory') {
+								var BotMessage = document.createElement('div');
+								BotMessage.innerHTML = message;
+								BotMessage.lang = selectedLanguage;
+								BotMessage.setAttribute('class', 'bot-message');
+								BotMessage.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+								var anchorTags = BotMessage.querySelectorAll('a');
+
+								// Apply specific styling to each anchor tag found
+								anchorTags.forEach(function (anchorTag) {
+									anchorTag.style.color = '#2166B1';
+									anchorTag.style.textDecoration = 'underline';
+								});
+								var BotMessageContainer = document.createElement('div');
+								BotMessageContainer.setAttribute(
+									'class',
+									'bot-message-container'
+								);
+
+								BotMessageContainer.appendChild(BotMessage);
+								var outerMessageContainer = document.createElement('div');
+								outerMessageContainer.setAttribute(
+									'class',
+									'outer-bot-message-container'
+								);
+								outerMessageContainer.appendChild(BotMessageContainer);
+								multipleMessageContainer.appendChild(outerMessageContainer);
+								messagesContainer.appendChild(multipleMessageContainer);
+								if (flag === 'chatHistory' && i === multiple.length - 1) {
+
+									const CreatedAt = new Date(customObj.response.createdAt._seconds * 1000 + customObj.response.createdAt._nanoseconds / 1e6);
+									const date = new Date(CreatedAt)
+									if (date) {
+										var timeDiv = document.createElement('div');
+										timeDiv.setAttribute('class', 'time-div');
+										timeDiv.lang = selectedLanguage;
+										timeDiv.innerHTML = getFormattedDateTime(date);
+										multipleMessageContainer.childNodes.forEach(child => {
+											if (child.classList.contains('time-div')) {
+												child.remove();
+											}
+										});
+										multipleMessageContainer.appendChild(timeDiv);
+										messagesContainer.appendChild(multipleMessageContainer);
+									}
+								}
+								if (isLastMsg && i === multiple.length - 1) {
+									var date;
+
+									if (flag === 'chatHistory') {
+										date =
+											(customObj.response &&
+												new Date(customObj.response.createdAt)) ||
+											new Date();
+									} else {
+										date = new Date();
+									}
+
+									var timeDiv = document.createElement('div');
+									timeDiv.setAttribute('class', 'time-div');
+									timeDiv.lang = selectedLanguage;
+									timeDiv.innerHTML = getFormattedDateTime(date);
+									multipleMessageContainer.appendChild(timeDiv);
+									messagesContainer.appendChild(multipleMessageContainer);
+								}
+
+								if (BotMessage) {
+									var shadowDemo = document.querySelector('#shadow');
+
+									if (shadowDemo !== null) {
+										var botBgColor = shadowDemo.getAttribute(
+											'bot-message-bg-color'
+										);
+										var botFontColor = shadowDemo.getAttribute(
+											'chat-bot-font-color'
+										);
+										BotMessage.style.setProperty('--bot-message-bg', botBgColor);
+										BotMessage.style.setProperty(
+											'--bot-message-font-color',
+											botFontColor
+										);
+									}
+								}
+
+								messagesContainer
+									.querySelectorAll('.loading')
+									.forEach(function (e) {
+										return e.remove();
+									});
+								multipleMessageContainer.scrollIntoView({
+									behavior: 'smooth',
+									block: 'start',
+									inline: 'nearest'
+								});
+							} else {
+								var _date =
+									(customObj.response &&
+										new Date(customObj.response.createdAt)) ||
+									new Date();
+
+								var isFirstMsg = customObj.isFirstMsg || false;
+								this.chatHistory += isFirstMsg
+									? 'CTABot:   '.concat(stripTags(botMessage), ' \n')
+									: ''.concat(stripTags(botMessage), ' \n');
+								this.chatHistory += isLastMsg
+									? ''.concat(getFormattedDateTime(new Date(_date)), ' \n\n')
+									: '';
+							}
+						})
+
+					}
+				},
+				{
+					key: '_updateChipText',
+					value: function _updateChipText(chip, inner, suggestionChipsContainer, disabledValue) {
+						var _this6 = this;
+						function chipClicked(chip, inner, suggestionChipsContainer, disabledValue) {
+							var chatInput = _this6.shadow.querySelector('.chat-input');
+							let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+							if ( inner === 'Something else' || inner === 'Otra cosa' || inner === 'Coś innego' || inner === 'Iba pa' || inner === '其他事情') {
+
+								disabledValue.forEach(function (chip) {
+									let suggestionChipListItem = document.createElement('li');
+									suggestionChipListItem.style.display = 'inline';
+									let suggestionChip = document.createElement('button');
+									suggestionChip.innerText = chip;
+									suggestionChip.setAttribute('class', 'suggestion-chip');
+									suggestionChip.setAttribute('tabindex', '0');
+									suggestionChip.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+									suggestionChip.lang = selectedLanguage;
+									suggestionChip.addEventListener('click', function (event) {
+										event.preventDefault();
+										chipClicked(suggestionChip, suggestionChip.innerText, suggestionChipsContainer, disabledValue)
+									});
+									suggestionChip.addEventListener('keydown', function (event) {
+										if (event.key === 'Enter') {
+											event.preventDefault();
+											chipClicked(suggestionChip, suggestionChip.innerText, suggestionChipsContainer, disabledValue)
+										}
+									});
+									let suggestionChipList = suggestionChipsContainer.querySelector("#suggestion-chip-list");
+									if(suggestionChipList) {
+										suggestionChipListItem.appendChild(suggestionChip);
+										suggestionChipList.appendChild(suggestionChipListItem);
+									}
+
+									suggestionChip.onclick = resetTimeout();
+								});
+							} else {
+								chatInput.value = chip.innerText;
+
+								if (chatInput.value) {
+									_this6._sendMessage();
+								}
+							}
+						}
+						chip.addEventListener('click', function (event) {
+							event.preventDefault();
+							chipClicked(chip, inner, suggestionChipsContainer, disabledValue)
+						});
+						chip.addEventListener('keydown', function (event) {
+							if (event.key === 'Enter') {
+								event.preventDefault();
+								chipClicked(chip, inner, suggestionChipsContainer, disabledValue)
+							}
+						});
+					}
+				},
+				{
+					key: '_updateDropdownText',
+					value: function _updateDropdownText(element) {
+						var _this7 = this;
+
+						var chatInput = _this7.shadow.querySelector('.chat-input');
+
+						var chatSendButton = _this7.shadow.querySelector(
+							'.chat-send-button'
+						);
+
+						var chatDisabledSendButton = _this7.shadow.querySelector(
+							'.chat-disabled-send-button'
+						);
+
+						chatInput.value = element;
+
+						if (chatInput.value) {
+							_this7._inputListener(
+								chatInput,
+								chatSendButton,
+								chatDisabledSendButton,
+								true
+							);
+
+							_this7._sendMessage();
+						}
+					}
+				},
+				{
+					key: '_updateDateTime',
+					value: function _updateDateTime(element, type) {
+						var chatInput = this.shadow.querySelector('.chat-input');
+						var chatSendButton = this.shadow.querySelector('.chat-send-button');
+						var chatDisabledSendButton = this.shadow.querySelector(
+							'.chat-disabled-send-button'
+						);
+						var value = element[0].value;
+						chatInput.value =
+							type === 'time'
+								? convertAmPm(value.substr(value.length - 5, value.length))
+								: element[0].value;
+
+						if (chatInput.value) {
+							this._inputListener(
+								chatInput,
+								chatSendButton,
+								chatDisabledSendButton,
+								true
+							);
+
+							this._sendMessage();
+						}
+					}
+				},
+				{
+					key: '_renderCustomResponseType',
+					value: function _renderCustomResponseType(
+						fields,
+						messagesContainer,
+						isLastMsg,
+						multipleMessageContainer,
+						customObj
+					) {
+						var _this8 = this;
+
+						fields = fields || {};
+						messagesContainer = messagesContainer || {};
+						isLastMsg = isLastMsg || false;
+						customObj = customObj || {};
+
+						const paramsFields = customObj.response.queryResult.parameters.fields
+						const busTrainService = paramsFields?.stops_response?.listValue
+						const lineCondition = paramsFields?.location?.stringValue
+						const trainStationName = paramsFields?.train_station?.stringValue
+						const botFontColor = shadow?.getAttribute('chat-bot-font-color') || '#231f20';
+						let selectedLanguage = getCookieValue('languageCode') || 'en-us';
+
+						var flag = customObj && customObj.flag;
+						var outerBotMessageContainer = document.createElement('div');
+						outerBotMessageContainer.setAttribute(
+							'class',
+							'outer-bot-message-container'
+						);
+
+						var lineBreak = '<br><br>';
+						var options = fields.options || {};
+						var type = (fields.type && fields.type.stringValue) || '';
+						var dropdownType = (fields.dropdownType && fields.dropdownType.stringValue) || '';
+
+						switch (type) {
+							case 'chips':
+								{
+									var values = options.listValue.values;
+									var suggestionChips = []
+									var disabledValue = []
+									for (let value = 0; value < Object.keys(values).length; value++) {
+										let intialVal = values[value].structValue.fields.initialDisplay.stringValue
+										let stringVal = values[value].structValue.fields.text.stringValue
+
+										if (intialVal === 'show' || intialVal === 'actionExpand') {
+											suggestionChips.push(stringVal);
+										} else if (intialVal === 'hide') {
+											disabledValue.push(stringVal);
+										}
+										if (intialVal === 'actionExpand') {
+											expandValue = stringVal
+										}
+									}
+
+									var suggestionChipsContainer = document.createElement('div');
+									suggestionChipsContainer.style.marginLeft = '0.5rem'
+									suggestionChipsContainer.style.marginTop = '0.25rem'
+									suggestionChipsContainer.setAttribute('id', 'suggestion-chip-container');
+
+									outerBotMessageContainer.classList.add('removable');
+
+									function removeAnotherIssueButtonIfMatches(text) {
+										if (text === expandValue) {
+											var anchorTags = suggestionChipsContainer.getElementsByTagName('button');
+											for (var i = 0; i < anchorTags.length; i++) {
+												if (anchorTags[i].innerText === expandValue) {
+													anchorTags[i].parentNode.removeChild(anchorTags[i]);
+													break; // Stop iterating once the anchor tag is removed
+												}
+											}
+										}
+									}
+
+									let suggestionChipsList = document.createElement("ul");
+									suggestionChipsList.setAttribute('id', 'suggestion-chip-list');
+									suggestionChipsList.style.listStyleType = 'none';
+									suggestionChipsList.style.margin = 0;
+									suggestionChipsList.style.padding = 0;
+									suggestionChipsList.style.marginBlockStart = 0;
+									suggestionChipsList.style.marginBlockEnd = 0;
+									suggestionChipsList.style.marginInlineStart = 0;
+									suggestionChipsList.style.marginInlineEnd = 0;
+									suggestionChipsList.style.paddingInlineStart = 0;
+									suggestionChipsList.style.paddingInlineEnd = 0;
+									suggestionChips.forEach(function (chip) {
+										let suggestionChipListItem = document.createElement('li');
+										suggestionChipListItem.style.display = 'inline';
+										var suggestionChip = document.createElement('button');
+										suggestionChip.innerText = chip;
+										suggestionChip.setAttribute('class', 'suggestion-chip');
+										suggestionChip.setAttribute('tabindex', '0');
+										suggestionChip.setAttribute('style', 'font-family: "FreeSans", "Helvetica", "Arial";');
+										suggestionChip.lang = selectedLanguage;
+										_this8._updateChipText(
+											suggestionChip,
+											suggestionChip.innerText,
+											suggestionChipsContainer,
+											disabledValue
+										);
+										suggestionChip.addEventListener('click', (event) => {
+											event.preventDefault();
+											removeAnotherIssueButtonIfMatches(event.target.innerText);
+										})
+										suggestionChip.addEventListener('keydown', (event) => {
+											if (event.key === 'Enter') {
+												event.preventDefault();
+												removeAnotherIssueButtonIfMatches(event.target.innerText);
+											}
+										});
+										suggestionChip.onclick = resetTimeout();
+										suggestionChipListItem.appendChild(suggestionChip);
+										suggestionChipsList.appendChild(suggestionChipListItem);
+									});
+									suggestionChipsContainer.appendChild(suggestionChipsList);
+									outerBotMessageContainer.appendChild(
+										suggestionChipsContainer
+									);
+									multipleMessageContainer.appendChild(
+										outerBotMessageContainer
+									);
+
+									if (isLastMsg) {
+										var timeDiv = document.createElement('div');
+										timeDiv.setAttribute('class', 'time-div');
+										timeDiv.innerHTML = getFormattedDateTime(new Date());
+										timeDiv.lang = selectedLanguage;
+										multipleMessageContainer.childNodes.forEach(child => {
+											if (child.classList.contains('time-div')) {
+												child.remove();
+											}
+										});
+										multipleMessageContainer.appendChild(timeDiv);
+									}
+
+									messagesContainer.appendChild(multipleMessageContainer);
+									multipleMessageContainer.scrollIntoView({
+										behavior: 'smooth',
+										block: 'start',
+										inline: 'nearest'
+									});
+								}
+								break;
+							case 'searchable_dropdown':
+								{
+									if (true) {
+										let items;
+										let currentFlow;
+										if(paramsFields && paramsFields.flow && paramsFields.flow.stringValue) {
+											currentFlow = paramsFields.flow.stringValue;
+										}
+										let cookie = getCookieValue('languageCode') || 'en-us';
+
+										let dropdownPlaceholderLanguageMapping = {
+											'en-us': { train_station: 'Search for train station',train_station_ashland: 'Search for train station',train_station_harlem: 'Search for train station',train_station_kedzie: 'Search for train station', train_line: 'Search for train line', bus_station: 'Search for bus station', bus_route: 'Search for bus route', elevator: 'Search for elevator', escalator: 'Search for escalator', elevator_escalator: 'Search for elevator/escalator', value: 'en-us' },
+											'es-us': { train_station: 'Buscar estación de tren',train_station_ashland: 'Buscar estación de tren',train_station_harlem: 'Buscar estación de tren',train_station_kedzie: 'Buscar estación de tren', train_line: 'Buscar línea de tren', bus_station: 'Buscar estación de autobuses', bus_route: 'Buscar ruta de autobús', elevator: 'Buscar ascensor', escalator: 'Buscar escalera mecánica', elevator_escalator: 'Buscar ascensor/escalera mecánica', value: 'es-us' },
+											'pl': { train_station: 'Szukaj stacji kolejowej',train_station_ashland: 'Szukaj stacji kolejowej',train_station_harlem: 'Szukaj stacji kolejowej',train_station_kedzie: 'Szukaj stacji kolejowej', train_line: 'Szukaj linii kolejowej', bus_station: 'Szukaj stacji autobusowej', bus_route: 'Szukaj trasy autobusowej', elevator: 'Szukaj windy', escalator: 'Szukaj schodów ruchomych', elevator_escalator: 'Szukaj windy/schodów ruchomych', value: 'pl' },
+											'fil': { train_station: 'Maghanap ng istasyon ng tren',train_station_ashland: 'Maghanap ng istasyon ng tren',train_station_harlem: 'Maghanap ng istasyon ng tren',train_station_kedzie: 'Maghanap ng istasyon ng tren', train_line: 'Maghanap ng linya ng tren', bus_station: 'Maghanap ng istasyon ng bus', bus_route: 'Maghanap ng ruta ng bus', elevator: 'Maghanap ng elevator', escalator: 'Maghanap ng escalator', elevator_escalator: 'Maghanap ng elevator/escalator', value: 'fil' },
+											'zh-cn': { train_station: '搜索地铁站',train_station_ashland: '搜索地铁站',train_station_harlem: '搜索地铁站',train_station_kedzie: '搜索地铁站', train_line: '搜索地铁线路', bus_station: '搜索巴士站', bus_route: '搜索巴士线路', elevator: '搜索电梯', escalator: '搜索自动扶梯', elevator_escalator: '搜索电梯/自动扶梯', value: 'zh-cn' }
+										};
+				
+										let placeholderLanguageText = dropdownPlaceholderLanguageMapping[cookie];
+										let placeholderText = "";
+
+										// if train station is captured show train line for it
+										if (lineCondition === 'train station' && dropdownType === 'train_line') {
+											var url = `${_this8.integrationServiceDomain}/api/v1/train/fetch-train-line/${trainStationName}`;
+										} else if (dropdownType === 'train_line') {
+											var url = `${_this8.integrationServiceDomain}/api/v1/messages/fetch-list/${cookie}/`.concat(encodeURI(dropdownType));
+										} else {
+											var url = `${_this8.integrationServiceDomain}/api/v1/messages/fetch-list/${cookie}/`.concat(encodeURI(dropdownType));
+										}
+
+										let authHeader = btoa(
+											''.concat(atob(_this8.userName), ':').concat(atob(_this8.password))
+										);
+
+										chatApiInProgressFlag = true;
+										fetch(`${url}`, {
+											method: 'GET',
+											headers: {
+												'Content-Type': 'application/json', // Set the appropriate content type if needed
+												// Add other headers if necessary
+												"ngrok-skip-browser-warning": "69420",
+												"Authorization": "Basic " + authHeader
+											},
+										})
+											.then(response => {
+												if (!response.ok) {
+													chatApiInProgressFlag = false;
+													throw new Error('Network response was not ok');
+												}
+												return response.json(); // Parse the JSON response
+											})
+											.then(data => {
+												chatApiInProgressFlag = false;
+												// Process the retrieved if its elevator or escaltor
+												if ((paramsFields?.is_escalator && paramsFields?.is_escalator?.kind != "nullValue") || (paramsFields?.is_elevator && paramsFields?.is_elevator?.kind != "nullValue") || (paramsFields?.is_elevator_escalator && paramsFields?.is_elevator_escalator?.kind != "nullValue")) {
+													// Filter the array based on the escaltor and elevator
+													const filteredArray = data.data.filter(item => {
+														if (paramsFields?.is_elevator?.boolValue && paramsFields?.is_elevator?.kind != "nullValue") {
+															dropdownType = 'elevator';
+															return item.isElevator === 'true';
+														} else if (paramsFields?.is_escalator?.boolValue && paramsFields?.is_escalator?.kind != "nullValue") {
+															dropdownType = 'escalator';
+															return item.isEscalator === 'true';
+														} else if (paramsFields?.is_elevator_escalator && paramsFields?.is_elevator_escalator?.kind != "nullValue") {
+															dropdownType = 'elevator/escalator';
+															return true;
+														}
+													});
+													data.data = filteredArray
+												}
+												items = data.data.map((item, index) => {
+													const route_id = item.name.split(' ')[0];
+													let display = true;
+													if(currentFlow === "service_issue" || currentFlow === "bus_train_status") {
+														// Only false check, don't do null check
+														if(item.displayInServiceIssue === false) {
+															display = false;
+														}
+													}
+													return { value: `${item.name}`, route_id: route_id, display: display };
+												});
+												if (dropdownType === "bus_route") {
+													items = items.filter((item) => item.display);
+													items = items.sort((a, b) => {
+														const getNumber = str => parseInt(str.match(/\d+/)[0], 10);
+														const routeIdA = getNumber(a.route_id);
+														const routeIdB = getNumber(b.route_id);
+														return routeIdA - routeIdB;
+													});
+												}
+												else if (dropdownType === 'bus_station_service_issue') {
+													items = Object.keys(busTrainService.values).map(key => {
+														const stop = busTrainService.values[key]?.structValue?.fields;
+														const name = stop.name.stringValue;
+														const route_id = name.split(' ')[0];
+														return { value: name, route_id: route_id };
+													});
+												} 
+												else if (dropdownType === 'train_station_without_line') {
+													items = Object.keys(busTrainService.values).map(key => {
+														const stop = busTrainService.values[key]?.structValue?.fields;
+														const name = stop.station_name.stringValue;
+														// const route_id = name.split(' ')[0];
+														return { value: name };
+													});
+													items = [...new Map(items.map(item => [item['value'], item])).values()];
+													items.sort((a, b) => {
+														// Use localeCompare for string comparison, which considers alphabetical order
+														return a.value.localeCompare(b.value);
+													});
+												}
+												else {
+													items.sort((a, b) => {
+														// Use localeCompare for string comparison, which considers alphabetical order
+														return a.value.localeCompare(b.value);
+													});
+												}
+												var displayStatus = '';
+												const dropdownCheck = this.shadow.querySelector('.message-container')
+												function removeTimeDivs(element) {
+													if (element.classList.contains('custom-dropdown')) {
+														element.remove();
+													} else {
+														// Traverse child nodes recursively
+														element.childNodes.forEach(child => {
+															if (child.nodeType === Node.ELEMENT_NODE) {
+																removeTimeDivs(child); // Recursive call for child nodes
+															}
+														});
+													}
+												}
+												removeTimeDivs(dropdownCheck);
+
+												const parentDiv = document.createElement('div');
+												parentDiv.className = 'custom-dropdown';
+												parentDiv.style.position = 'relative'; // Add other common styles if needed
+												parentDiv.style.width = '226px'; // Add other common styles if needed
+												parentDiv.style.marginLeft = '0.5rem'; // Add other common styles if needed
+												parentDiv.style.display = displayStatus;
+												parentDiv.id = 'parentDivID'; // Add an ID to the element
+
+
+												const searchInput = document.createElement('input');
+												searchInput.type = 'text';
+												searchInput.id = 'searchInput';
+												searchInput.lang = cookie;
+
+												switch (dropdownType) {
+													case "train_station":
+													case "train_station_without_line":{
+														placeholderText = placeholderLanguageText.train_station;
+													}
+														break;
+
+													case "bus_station":
+													case "bus_station_service_issue":{
+														placeholderText = placeholderLanguageText.bus_station;
+													}
+														break;
+													
+													case "bus_route":{
+														placeholderText = placeholderLanguageText.bus_route;
+													}
+														break;
+
+													case "train_line":{
+														placeholderText = placeholderLanguageText.train_line;
+													}
+														break;
+													
+													case "elevator":{
+														placeholderText = placeholderLanguageText.elevator;
+													}
+														break;
+
+													case "escalator":{
+														placeholderText = placeholderLanguageText.escalator;
+													}
+														break;
+													
+													case "elevator/escalator":
+													case "train_station_with_escalator_elevator":{
+														placeholderText = placeholderLanguageText.elevator_escalator;
+													}
+														break;
+													
+													case "train_station_ashland":{
+														placeholderText = placeholderLanguageText.train_station_ashland;
+													}
+														break;
+	
+													case "train_station_harlem":{
+														placeholderText = placeholderLanguageText.train_station_harlem;
+													}
+														break;
+	
+													case "train_station_kedzie":{
+														placeholderText = placeholderLanguageText.train_station_kedzie;
+													}
+														break;
+												
+													default:
+														break;
+												}
+												searchInput.setAttribute('placeholder', `${placeholderText}`);
+
+												searchInput.style.width = '90%';
+												searchInput.style.padding = '10px';
+												searchInput.style.border = '1px solid #ccc';
+												searchInput.style.borderRadius = '4px';
+												searchInput.style.fontSize = '16px';
+												searchInput.tabIndex = 0; // Add tabindex attribute
+
+												const dropdownList = document.createElement('div');
+												dropdownList.className = 'dropdown-list';
+												dropdownList.id = 'dropdownList';
+												dropdownList.style.position = 'absolute';
+												dropdownList.style.zIndex = '1';
+												dropdownList.style.width = '100%';
+												dropdownList.style.maxHeight = '150px';
+												dropdownList.style.overflowY = 'auto';
+												dropdownList.style.border = '1px solid #ccc';
+												dropdownList.style.borderRadius = '4px';
+												dropdownList.style.boxSizing = 'border-box';
+												dropdownList.style.marginTop = '5px';
+												dropdownList.style.color = botFontColor;
+												dropdownList.tabIndex = -1; // Add tabindex attribute
+
+												if (fields.headerText) {
+													var msg = '';
+													var length = fields.headerText.listValue.values.length - 1;
+													fields.headerText.listValue.values.forEach(function (
+														value,
+														i
+													) {
+														msg +=
+															length !== i
+																? ''.concat(value.stringValue).concat(lineBreak)
+																: ''.concat(value.stringValue);
+													});
+
+													this._insertBotMessages(
+														msg,
+														messagesContainer,
+														false,
+														multipleMessageContainer,
+														customObj
+													);
+												}
+
+												function removeParentDiv() {
+													var parentDiv = document.getElementById("parentDivID");
+													dropdownList.style.display = 'none';
+													if (parentDiv) {
+														document.body.removeChild(parentDiv);
+													}
+												}
+												let currentFocus = -1; // Initialize currentFocus variable
+												dropdownList.addEventListener('focus', () => {
+													currentFocus = 0; // Set currentFocus to the first element when search input is focused
+													dropdownList.firstElementChild.focus(); // Set focus to the first list item
+												});
+
+												// Loop through each item and create a new element for it
+												items.forEach((item, index) => {
+													const element = document.createElement('div');
+													element.classList.add('dropdown-list-item');
+													element.textContent = item.value;
+													element.tabIndex = 0;
+													element.style.padding = '10px';
+													element.style.cursor = 'pointer';
+													element.style.fontSize = '16px';
+													element.style.transition = 'background-color 0.3s ease';
+													dropdownList.appendChild(element);
+													element.setAttribute('data-index', index);
+													// Add click event listener to each list item
+													element.addEventListener('click', () => {
+														// Handle the item selection here
+														searchInput.value = item.value; // Set a sample text for demonstration
+														searchInput.disabled = true;
+														dropdownList.style.display = 'none';
+														_this8._updateDropdownText(item.value);
+														removeParentDiv();
+													});
+													// Add keydown event listener to each list item
+													element.addEventListener('keydown', (e) => {
+														const currentIndex = parseInt(e.target.getAttribute('data-index'), 10);
+														let newIndex = currentIndex;
+														let dropdownLen = e.target.parentElement.querySelectorAll('.dropdown-list-item').length;
+
+														if (e.key === 'ArrowDown') {
+															for (let indx = currentIndex + 1; indx < (dropdownLen + currentIndex); indx++) {
+																if (dropdownList.children[indx % dropdownLen] && dropdownList.children[indx % dropdownLen].style.display != 'none') {
+																	newIndex = indx % dropdownLen;
+																	break;
+																}
+															}
+														} else if (e.key === 'ArrowUp') {
+															for (let indx = (dropdownLen + currentIndex - 1); indx > currentIndex; indx--) {
+																if (dropdownList.children[indx % dropdownLen] && dropdownList.children[indx % dropdownLen].style.display != 'none') {
+																	newIndex = indx % dropdownLen;
+																	break;
+																}
+															}
+														} else if (e.key === 'Enter') {
+															// Handle the item selection here
+															searchInput.value = dropdownList.children[currentIndex].textContent;
+															searchInput.disabled = true;
+															dropdownList.style.display = 'none';
+															this._updateDropdownText(dropdownList.children[currentIndex].textContent);
+															return;
+														}
+														else if (e.shiftKey && e.key === 'Tab') {
+															e.preventDefault();
+															searchInput.focus();
+														}
+														else if (e.key === 'Tab') {
+															e.preventDefault()
+															const inputElement = this.shadow.querySelector('.chat-input')
+															inputElement.focus()
+														}
+														if (e.key !== 'Tab') {
+															e.preventDefault();
+															const newElement = parentDiv.querySelector('.dropdown-list').querySelector(`[data-index="${typeof newIndex === 'number' ? newIndex : currentIndex}"]`);
+															newElement.focus();
+														}
+													});
+												});
+												if (dropdownList.children.length > 0) {
+													dropdownList.children[0].focus();
+												}
+
+												if (isLastMsg) {
+													var timeDiv = document.createElement('div');
+													timeDiv.setAttribute('class', 'time-div');
+													timeDiv.lang = cookie;
+													timeDiv.innerHTML = getFormattedDateTime(new Date());
+													multipleMessageContainer.appendChild(dropdownList);
+												}
+
+												// Add an event listener to the input for real-time filtering
+												searchInput.addEventListener('input', function () {
+													
+													const filter1 = searchInput.value.toLowerCase();
+													const items = dropdownList.getElementsByClassName('dropdown-list-item');
+
+													// Loop through all items and hide those that don't match the filter
+													let flag = false;
+													for (let i = 0; i < items.length; i++) {
+							
+														const item = items[i];
+														const textContent = item.textContent.toLowerCase();
+														// console.log(textContent, filter1, textContent.includes(filter1));
+														if (textContent.includes(filter1)) {
+															flag = true;
+															item.style.display = '';
+														} else {
+															item.style.display = 'none';
+														}
+													}
+
+													if (!flag)
+														for (let j = 0; j <= items.length - 1; j++)
+															items[j].style.display = ''
+
+															// List of stop words to ignore
+															const stopWords = ['the', 'a', 'an', '#', 'bus'];
+
+															// Function to remove stop words and get the relevant keywords
+															function getRelevantKeyword(input) {
+																let words;
+																if (input.toLowerCase().includes('#')) {
+																	words = input.toLowerCase().split('#');
+
+																} else {
+																	// Split the input by spaces and filter out stop words
+																	words = input.toLowerCase().split(' ').filter(word =>  !stopWords.includes(word));
+																}
+
+																// Return the remaining words as a single string
+																return words.join(' ').trim();
+															}
+
+															    // Add an event listener to the input for real-time filtering
+															    searchInput.addEventListener('input', function () {
+																// Get the filtered input without stop words
+																const filter = getRelevantKeyword(searchInput.value);
+																const items = dropdownList.getElementsByClassName('dropdown-list-item');
+
+																// Loop through all items and hide those that don't match the filter
+																for (let i = 0; i < items.length; i++) {
+																	const item = items[i];
+																	const textContent = item.textContent.toLowerCase();
+																	if (textContent.includes(filter)) {
+																		item.style.display = '';
+																	} else {
+																		item.style.display = 'none';
+																	}
+																}
+															}),
+
+													
+															
+													dropdownList.scrollIntoView({
+														behavior: 'smooth',
+														block: 'start',
+														inline: 'nearest'
+													});
+												});
+												
+												// Append searchInput and dropdownList inside parentDiv
+												parentDiv.appendChild(searchInput);
+												parentDiv.appendChild(dropdownList);
+
+												// Append the parentDiv to the document body
+												document.body.appendChild(parentDiv);
+
+												outerBotMessageContainer.appendChild(parentDiv);
+												multipleMessageContainer.appendChild(
+													outerBotMessageContainer
+												);
+
+												messagesContainer.appendChild(multipleMessageContainer);
+												multipleMessageContainer.scrollIntoView({
+													behavior: 'smooth',
+													block: 'start',
+													inline: 'nearest'
+												});
+											})
+											.catch(error => {
+												// Handle errors
+												console.error('There was a problem with the fetch operation:', error);
+											});
+									}
+
+								}
+								break;
+							case 'table':
+								{
+									var _values = options.listValue.values;
+									var hasHeader = fields.hasHeader.boolValue;
+
+									var rows = _values.map(function (value) {
+										return value.listValue.values;
+									});
+
+									var tableContainer = document.createElement('div');
+
+									if (fields.headerText) {
+										var msg = '';
+										var length = fields.headerText.listValue.values.length - 1;
+										fields.headerText.listValue.values.forEach(function (
+											value,
+											i
+										) {
+											msg +=
+												length !== i
+													? ''.concat(value.stringValue).concat(lineBreak)
+													: ''.concat(value.stringValue);
+										});
+
+										this._insertBotMessages(
+											msg,
+											messagesContainer,
+											false,
+											multipleMessageContainer,
+											customObj
+										);
+									}
+
+									if (flag !== 'downloadHistory') {
+										var table = document.createElement('TABLE');
+										table.setAttribute('class', 'table');
+										var tBody = document.createElement('TBODY');
+										table.appendChild(tBody);
+										tableContainer.appendChild(table);
+										rows.forEach(function (row, i) {
+											var tableRow = document.createElement('tr');
+											if (hasHeader && i === 0) { tableRow.setAttribute('class', 'header-row'); } else tableRow.setAttribute('class', 'table-row');
+											if (!(hasHeader && i === 0) && i % 2 !== 0) { tableRow.classList.add('highlight-row'); }
+											row.forEach(function (col) {
+												var tableCol = document.createElement('td');
+												tableCol.setAttribute('class', 'table-col');
+												tableCol.innerText = col.stringValue;
+												tableRow.appendChild(tableCol);
+											});
+											tBody.appendChild(tableRow);
+										});
+										outerBotMessageContainer.appendChild(tableContainer);
+										multipleMessageContainer.appendChild(
+											outerBotMessageContainer
+										);
+
+										if (isLastMsg) {
+											var _timeDiv = document.createElement('div');
+
+											_timeDiv.setAttribute('class', 'time-div');
+
+											_timeDiv.innerHTML = getFormattedDateTime(new Date());
+											multipleMessageContainer.appendChild(
+												outerBotMessageContainer
+											);
+											multipleMessageContainer.appendChild(_timeDiv);
+											messagesContainer.appendChild(multipleMessageContainer);
+											multipleMessageContainer.scrollIntoView({
+												behavior: 'smooth',
+												block: 'start',
+												inline: 'nearest'
+											});
+										}
+									} else {
+										customObj.isFirstMsg =
+											flag === 'downloadHistory' ? false : customObj.isFirstMsg;
+										var _msg = '';
+
+										var _length = rows.length - 1;
+
+										rows.forEach(function (row, i) {
+											var colLen = row.length - 1;
+											row.forEach(function (col, j) {
+												_msg +=
+													colLen !== j
+														? ''.concat(col.stringValue, ' \t')
+														: col.stringValue;
+											});
+											_msg += _length !== i ? '\n' : '';
+										});
+
+										this._insertBotMessages(
+											_msg,
+											messagesContainer,
+											false,
+											multipleMessageContainer,
+											customObj
+										);
+									}
+
+									if (fields.footerText) {
+										var _msg2 = '';
+
+										var _length2 =
+											fields.footerText.listValue.values.length - 1;
+
+										fields.footerText.listValue.values.forEach(function (
+											value,
+											i
+										) {
+											_msg2 +=
+												_length2 !== i
+													? ''.concat(value.stringValue).concat(lineBreak)
+													: ''.concat(value.stringValue);
+										});
+
+										this._insertBotMessages(
+											_msg2,
+											messagesContainer,
+											false,
+											multipleMessageContainer,
+											customObj
+										);
+									}
+								}
+								break;
+
+							case 'image':
+								{
+									var data = options.structValue.fields;
+									var imgContainer = document.createElement('div');
+									imgContainer.setAttribute('class', 'margin10');
+									var img = document.createElement('img');
+									img.setAttribute('class', 'image');
+									img.setAttribute('src', data.imageUrl.stringValue);
+									img.setAttribute('aria-label', data.accessibilityText.stringValue);
+									var anchor = document.createElement('a');
+
+									if (data.redirectUrl) {
+										anchor.setAttribute('href', data.redirectUrl.stringValue);
+										anchor.setAttribute('target', '_blank');
+										anchor.appendChild(img);
+										imgContainer.appendChild(anchor);
+									} else {
+										imgContainer.appendChild(img);
+									}
+
+									outerBotMessageContainer.appendChild(imgContainer);
+
+									if (isLastMsg) {
+										var _timeDiv2 = document.createElement('div');
+
+										_timeDiv2.setAttribute('class', 'time-div');
+
+										_timeDiv2.innerHTML = getFormattedDateTime(new Date());
+										multipleMessageContainer.appendChild(
+											outerBotMessageContainer
+										);
+										multipleMessageContainer.appendChild(_timeDiv2);
+										messagesContainer.appendChild(multipleMessageContainer);
+									}
+
+									multipleMessageContainer.scrollIntoView({
+										behavior: 'smooth',
+										block: 'start',
+										inline: 'nearest'
+									});
+								}
+								break;
+
+							case 'dropdown':
+								{
+									var _values2 = options.listValue.values;
+
+									var selectEle = document.createElement('select');
+									selectEle.classList.add('dropdown', 'margin10', 'removable');
+									var optionOne = document.createElement('option');
+									optionOne.setAttribute('class', 'option');
+									optionOne.setAttribute('value', '');
+									optionOne.innerText = '- Please select a name -';
+									selectEle.appendChild(optionOne);
+
+									_values2.forEach(function (value) {
+										var option = document.createElement('option');
+										option.setAttribute('class', 'option');
+										var stringValue = value.stringValue;
+										option.setAttribute('value', stringValue);
+										option.innerText = stringValue;
+										selectEle.appendChild(option);
+									});
+
+									selectEle.onchange = this._updateDropdownText(selectEle);
+									outerBotMessageContainer.appendChild(selectEle);
+
+									if (isLastMsg) {
+										var _timeDiv3 = document.createElement('div');
+
+										_timeDiv3.setAttribute('class', 'time-div');
+
+										_timeDiv3.innerHTML = getFormattedDateTime(new Date());
+										multipleMessageContainer.appendChild(
+											outerBotMessageContainer
+										);
+										multipleMessageContainer.appendChild(_timeDiv3);
+										messagesContainer.appendChild(multipleMessageContainer);
+									}
+
+									multipleMessageContainer.scrollIntoView({
+										behavior: 'smooth',
+										block: 'start',
+										inline: 'nearest'
+									});
+								}
+								break;
+
+							case 'date':
+								{
+									var dateContainer = document.createElement('div');
+									dateContainer.classList.add('date-container');
+									var input = document.createElement('input');
+									input.setAttribute('type', 'text');
+									input.setAttribute('id', 'datePicker');
+									var calendarIcon = document.createElement('img');
+									calendarIcon.setAttribute('class', 'calendar-icon');
+									calendarIcon.setAttribute('aria-label', 'calendar');
+									calendarIcon.src =
+										`${this.storageUrl}/calendar.png`;
+									dateContainer.appendChild(calendarIcon);
+									dateContainer.appendChild(input);
+									outerBotMessageContainer.appendChild(dateContainer);
+									outerBotMessageContainer.classList.add('removable');
+
+									if (isLastMsg) {
+										var _timeDiv4 = document.createElement('div');
+
+										_timeDiv4.setAttribute('class', 'time-div');
+
+										_timeDiv4.innerHTML = getFormattedDateTime(new Date());
+										multipleMessageContainer.appendChild(
+											outerBotMessageContainer
+										);
+										multipleMessageContainer.appendChild(_timeDiv4);
+										messagesContainer.appendChild(multipleMessageContainer);
+									}
+
+									$.datetimepicker.setLocale('en-us');
+									var shadowRoot = document.querySelector('#shadow').shadowRoot;
+									var self = document.querySelector('#shadow');
+									var element = $(shadowRoot).find('#datePicker');
+									element.datetimepicker({
+										timepicker: false,
+										mask: 'Select Date Here',
+										format: 'm/d/Y',
+										onSelectDate: function onSelectDate() {
+											self._updateDateTime(element, type);
+										}
+									});
+									multipleMessageContainer.scrollIntoView({
+										behavior: 'smooth',
+										block: 'start',
+										inline: 'nearest'
+									});
+								}
+								break;
+
+							case 'time':
+								{
+									var _dateContainer = document.createElement('div');
+
+									_dateContainer.classList.add('date-container');
+
+									var _input = document.createElement('input');
+
+									_input.setAttribute('type', 'text');
+
+									_input.setAttribute('id', 'timePicker');
+
+									var clockIcon = document.createElement('img');
+									clockIcon.setAttribute('class', 'clock-icon');
+									clockIcon.setAttribute('aria-label', 'clock');
+									clockIcon.src =
+										`${this.storageUrl}/clock.png`;
+
+									_dateContainer.appendChild(clockIcon);
+
+									_dateContainer.appendChild(_input);
+
+									outerBotMessageContainer.appendChild(_dateContainer);
+									outerBotMessageContainer.classList.add('removable');
+
+									if (isLastMsg) {
+										var _timeDiv5 = document.createElement('div');
+
+										_timeDiv5.setAttribute('class', 'time-div');
+
+										_timeDiv5.innerHTML = getFormattedDateTime(new Date());
+										multipleMessageContainer.appendChild(
+											outerBotMessageContainer
+										);
+										multipleMessageContainer.appendChild(_timeDiv5);
+										messagesContainer.appendChild(multipleMessageContainer);
+									}
+
+									$.datetimepicker.setLocale('en-us');
+									var _shadowRoot = document.querySelector('#shadow')
+										.shadowRoot;
+
+									var _self = document.querySelector('#shadow');
+
+									var _element = $(_shadowRoot).find('#timePicker');
+
+									_element.datetimepicker({
+										datepicker: false,
+										mask: 'Select Time Here',
+										formatTime: 'h:i a',
+										step: 5,
+										onSelectTime: function onSelectTime() {
+											_self._updateDateTime(_element, type);
+										}
+									});
+
+									multipleMessageContainer.scrollIntoView({
+										behavior: 'smooth',
+										block: 'start',
+										inline: 'nearest'
+									});
+								}
+								break;
+
+							default: {
+								console.log('did not recognize given custom response type!');
+							}
+						}
+					}
+				},
+				{
+					key: '_refreshSession',
+					value: function _refreshSession(shouldCloseWindow, triggerWelcome) {
+						let _this = this;
+						triggerWelcome =
+							typeof triggerWelcome === 'boolean' ? triggerWelcome : true;
+						shouldCloseWindow =
+							typeof shouldCloseWindow === 'boolean' ? shouldCloseWindow : true;
+
+						const lang = getCookieValue('languageCode') || 'en-us';
+						var languageObject = languages.find(function (language) {
+							return language.value === lang;
+						});
+
+						var welcomeMsg = languageObject?.message ? languageObject?.message : 'hi'
+
+						this._removeAllMessageNodes(
+							this.shadow.querySelector('.message-container')
+						);
+
+						shouldCloseWindow && openChatWindow(event);
+						var downScroll = this.shadow.querySelector(
+							'.btn-animate-hover.scroll-down'
+						);
+						downScroll.style.display = 'none';
+						var chatInput = this.shadow.querySelector('.chat-input');
+						chatInput.value = ''; // remove address suggestions
+
+						if (this.shadow.querySelector('.suggestion-dropdown')) {
+							this.shadow.querySelector('.suggestion-dropdown').remove();
+						}
+
+						chatInput.removeEventListener('keyup', this._suggestAddress);
+						chatInput.removeEventListener('keyup', this._suggestKeywords);
+						triggerWelcome && this._webhookApi(welcomeMsg, true, 'newSession');
+					}
+				},
+				{
+					key: '_removeAllMessageNodes',
+					value: function _removeAllMessageNodes(parent) {
+						const outerBotMessages = parent.querySelectorAll('.outer-bot-message-container');
+						// Loop through each outer-bot-message element and remove it
+						outerBotMessages.forEach(message => {
+							message.remove(); // Remove the element
+						});
+
+						const outerUserMessages = parent.querySelectorAll('.outer-user-message-container');
+						// Loop through each outer-bot-message element and remove it
+						outerUserMessages.forEach(message => {
+							message.remove(); // Remove the element
+						});
+
+						const timeDiv = parent.querySelectorAll('.outer-user-message-container');
+						// Loop through each outer-bot-message element and remove it
+						outerUserMessages.forEach(message => {
+							message.remove(); // Remove the element
+						});
+
+						// Function to recursively remove elements with class name 'time-div'
+						function removeTimeDivs(element) {
+							if (element.classList.contains('time-div')) {
+								element.remove(); // Remove the element if it has the class 'time-div'
+							} else {
+								// Traverse child nodes recursively
+								element.childNodes.forEach(child => {
+									if (child.nodeType === Node.ELEMENT_NODE) {
+										removeTimeDivs(child); // Recursive call for child nodes
+									}
+								});
+							}
+						}
+						removeTimeDivs(parent);
+
+						// while (parent.querySelector('.outer-user-message-container')) {
+						//   parent.querySelector('.outer-user-message-container').remove();
+						// }
+
+						while (parent.querySelector('.multiple-message-container')) {
+							parent.querySelector('.multiple-message-container').remove();
+						}
+					}
+				},
+				{
+					key: '_attachInputEventListener',
+					value: function _attachInputEventListener(callback) {
+						var chatInput = this.shadow.querySelector('.chat-input');
+						chatInput.addEventListener('keyup', callback);
+					}
+				},
+				{
+					key: '_requestHandler',
+					value: function _requestHandler(
+						type,
+						url,
+						data,
+						callback,
+						authHeader
+					) {
+						var _this9 = this;
+
+						data = data || {};
+						var flag = data.flag || '';
+						authHeader = authHeader || '';
+						var Http = new XMLHttpRequest();
+						Http.open(type, url, true);
+						authHeader &&
+							Http.setRequestHeader(
+								'Authorization',
+								'Basic '.concat(authHeader)
+							);
+						Http.setRequestHeader(
+							"ngrok-skip-browser-warning", "69420",
+							'content-type',
+							'application/json; charset=UTF-8'
+						);
+
+						if (data.body && !(type === 'GET' || type === 'DELETE')) {
+							Http.send(JSON.stringify(data.body));
+						} else {
+							Http.send();
+						}
+
+						Http.responseType = 'json';
+
+						Http.onreadystatechange = function (e) {
+							if (
+								Http.readyState === 4 &&
+								Http.status === 200 &&
+								Http.response &&
+								Http.response.data
+							) {
+								var response = Http.response.data;
+								callback(response, _this9, flag);
+							} else {
+								resetBotElements();
+							}
+						};
+					}
+				}
+			]);
+
+			return ShadowDemo;
+		})(/* #__PURE__ */ _wrapNativeSuper(HTMLElement));
+
+		customElements.define('shadow-demo', ShadowDemo);
+		document.addEventListener('DOMContentLoaded', function () {
+			if (!isBrowserCompatible()) {
+				return;
+			} // this function runs when the DOM is ready, i.e. when the document has been parsed
+
+			var shadowDemo = document.querySelector('#shadow').shadowRoot;
+			var messageContainer = shadowDemo.querySelector('.message-container');
+			var chatTitle = shadowDemo.querySelector('.chat-title');
+			var downScroll = shadowDemo.querySelector(
+				'.btn-animate-hover.scroll-down'
+			);
+
+			function scrollCallback() {
+				if (messageContainer.scrollTop > 10) {
+					chatTitle.classList.add('scrollGradient');
+				} else {
+					chatTitle.classList.remove('scrollGradient');
+				}
+
+				if (
+					messageContainer.scrollTop + messageContainer.offsetHeight >=
+					messageContainer.scrollHeight - 2.3
+				) {
+					downScroll.style.display = 'none';
+				} else {
+					if (messageContainer.querySelectorAll('.outer-bot-message-container').length >= 2) {
+						downScroll.style.display = 'flex';
+					}
+				}
+			}
+
+			let debouncedScrollCallback = _debounce(() => scrollCallback());
+			messageContainer.addEventListener('scroll', debouncedScrollCallback);
+		});
+	} catch (error) {
+		console.log('error is ' + error);
+	}
+}
