@@ -10,7 +10,7 @@ How equitable is CTA transit service reliability across Chicago neighborhoods, a
 
 To obtain rail system alert data from the Chicago Transit Authority (CTA), I used a web scraping approach. The CTA publishes system status and alerts on its website, but the site blocks automated web requests from R. Because of this, direct scraping from the live URL was not possible.
 
-To preserve the web scraping method while avoiding server restrictions, I downloaded the full HTML of the CTA System Status & Alerts page using a standard web browser. I then used the rvest package in R to parse and extract structured rail alert information directly from the saved HTML file. This method still demonstrates the core principles of web scraping: navigating HTML structure, selecting elements with CSS selectors, and transforming the extracted content into a usable dataset.
+To preserve the web scraping method while avoiding server restrictions, I downloaded the full HTML of the CTA System Status & Alerts page using a standard web browser. I then used the rvest package in R to parse and extract structured rail alert information directly from the saved HTML file. This method still demonstrates the core principles of web scraping: navigating HTML structure, selecting elements with CSS selectors, and transforming the extracted content into a usable data set.
 
 Web scrapping
 
@@ -50,13 +50,13 @@ rail_alerts <- tibble(
 rail_alerts
 ```
 
-The scraped dataset will serve as the foundation for subsequent steps, including data cleaning, visualization, and the analysis of how rail conditions vary across Chicago’s neighborhoods and populations.
+The scraped data set will serve as the foundation for subsequent steps, including data cleaning, visualization, and the analysis of how rail conditions vary across Chicago’s neighborhoods and populations.
 
 ## 3. Data Wrangling and Quality Evaluation
 
-After scraping the rail alerts from the CTA System Status & Alerts page, I performed a series of wrangling steps to prepare the data set for analysis. The raw scraped data included the rail line name, a hyperlink to CTA’s route page, and a status description for each rail line. Although the data set is relatively small, it still required cleaning and structuring to ensure consistency and analytical usefulness.
+After scraping the rail alerts from the CTA System Status & Alerts page, I performed a series of wrangling steps to prepare the data set for analysis. The raw scraped data included the rail line name, a hyperlink to CTA’s route page, and a status description for each rail line. Although the data set is relatively small, it still required cleaning and structuring to ensure consistency and analytically usefulness.
 
-First, I standardized variable names, trimmed whitespace, and removed any non-informative rows. I then extracted key components of the service status, such as distinguishing between “Normal Service,” “Minor Delays,” and other operational statuses. Standardizing these values enables more reliable grouping and comparison across rail lines.
+First, I standardized variable names, trimmed white space, and removed any non-informative rows. I then extracted key components of the service status, such as distinguishing between “Normal Service,” “Minor Delays,” and other operational statuses. Standardizing these values enables more reliable grouping and comparison across rail lines.
 
 Next, I evaluated data quality issues that commonly arise in scraped data. These included inconsistent status wording across lines, potential missing values, and whether the hyperlink fields were complete. Although the CTA’s website provides a structured table, the text content is not fully standardized, so additional transformation was needed to categorize alerts into meaningful groups.
 
@@ -142,13 +142,13 @@ glimpse(rail_clean)
 
 Several equity and quality issues emerged during the wrangling process:
 
--   **Missing Lines:** Not all rail lines appear in the scraped table. This may reflect real conditions (e.g., a line experiencing no service alerts), but it still introduces the possibility of missing data that affects representativeness.
+-   Missing Lines: Not all rail lines appear in the scraped table. This may reflect real conditions (e.g., a line experiencing no service alerts), but it still introduces the possibility of missing data that affects representativeness.
 
--   **Status Description Variability:** CTA uses inconsistent wording for service conditions. The decisions made during standardization may influence downstream comparisons, and these transformations introduce subjective interpretation.
+-   Status Description Variability: CTA uses inconsistent wording for service conditions. The decisions made during standardization may influence downstream comparisons, and these transformations introduce subjective interpretation.
 
--    **Snapshot Bias:** The scraped HTML represents a single moment in time rather than a historical data set. Service reliability varies by time of day and day of week, so this snapshot may not fully represent overall performance.
+-   Snapshot Bias: The scraped HTML represents a single moment in time rather than a historical data set. Service reliability varies by time of day and day of week, so this snapshot may not fully represent overall performance.
 
--    **Equity Relevance:** If certain lines—especially those serving predominantly low-income or marginalized neighborhoods—show more frequent or more severe alerts, these patterns must be interpreted carefully. Data limitations and website structure constrain the conclusions that can be drawn.
+-   Equity Relevance: If certain lines—especially those serving predominantly low-income or marginalized neighborhoods—show more frequent or more severe alerts, these patterns must be interpreted carefully. Data limitations and website structure constrain the conclusions that can be drawn.
 
 Overall, the data set is clean and structured enough to support exploratory visualization and analytically work in subsequent sections, but the limitations above should be considered when interpreting results.
 
@@ -201,7 +201,7 @@ theme_minimal()
 
 4.3 Visualization 3: Rail Lines Appearing in Alerts
 
-This chart helps identify rail lines that may be missing, overrepresented, or behaving differently in terms of alert frequency.
+This chart helps identify rail lines that may be missing, over represented, or behaving differently in terms of alert frequency.
 
 ```{r}
 rail_clean |>
@@ -220,7 +220,7 @@ theme_minimal()
 
 4.4 Interactive Visualization
 
-This interactive bar chart uses **plotly**, allowing the user to hover over rail lines for details. Interactive components satisfy the Quarto project requirement.
+This interactive bar chart uses plotly, allowing the user to hover over rail lines for details. Interactive components satisfy the Quarto project requirement.
 
 ```{r}
 suppressPackageStartupMessages({
@@ -252,13 +252,13 @@ fig
 
 4.5 Reproducibility Notes
 
--    All visualizations update automatically when the data set changes.
+-   All visualizations update automatically when the data set changes.
 
--    The code blocks can be rerun at any time to regenerate charts.
+-   The code blocks can be rerun at any time to regenerate charts.
 
--    Using Quarto ensures transparency and allows readers to inspect the full analysis pipeline.
+-   Using Quarto ensures transparency and allows readers to inspect the full analysis pipeline.
 
--    The interactive figure adds user-friendly exploration and supports policymaking audiences who may prefer visual summaries.
+-   The interactive figure adds user-friendly exploration and supports policymaking audiences who may prefer visual summaries.
 
 ## 5. Advanced Analysis: Clustering Rail Lines Using Machine Learning
 
@@ -290,7 +290,7 @@ This produces a table where each row is a rail line and each column is the count
 
 Because k-means requires the number of clusters to be no greater than the number of distinct feature profiles, I set the number of clusters to:
 
-**min(3, number of distinct feature patterns)**
+min(3, number of distinct feature patterns)
 
 This prevents errors and ensures meaningful clusters.
 
@@ -384,26 +384,118 @@ theme_minimal()
 
 5.5 Interpretation of Machine Learning Results
 
--    The k-means algorithm grouped rail lines based on how many alerts they had in each status category.
+-   The k-means algorithm grouped rail lines based on how many alerts they had in each status category.
 
--    Lines with similar operational patterns appear in the same cluster.
+-   Lines with similar operational patterns appear in the same cluster.
 
--    Some clusters may reflect lines experiencing primarily normal service, while others may reflect lines with more construction-related disruptions or operational delays.
+-   Some clusters may reflect lines experiencing primarily normal service, while others may reflect lines with more construction-related disruptions or operational delays.
 
--    Because the data set is a snapshot, clusters suggest *short-term* operational similarities, not long-term reliability trends.
+-   Because the data set is a snapshot, clusters suggest *short-term* operational similarities, not long-term reliability trends.
 
 5.6 Fairness and Limitations
 
--    **Snapshot bias:** The analysis reflects conditions only for the moment the HTML was scraped, not long-term performance.
+-   Snapshot bias: The analysis reflects conditions only for the moment the HTML was scraped, not long-term performance.
 
--    **Small data set:** With limited alerts and a small number of rail lines, clusters should be interpreted cautiously.
+-   Small data set: With limited alerts and a small number of rail lines, clusters should be interpreted cautiously.
 
--    **Reporting bias:** CTA’s website communicates certain alerts differently across lines. Differences in reporting may influence clusters.
+-   Reporting bias: CTA’s website communicates certain alerts differently across lines. Differences in reporting may influence clusters.
 
--    **Equity implications:** Lines serving marginalized communities could appear more frequently in “disrupted” clusters—however, drawing these conclusions responsibly requires historical and demographic data that is beyond the scraped data set.
+-   Equity implications: Lines serving marginalized communities could appear more frequently in “disrupted” clusters—however, drawing these conclusions responsibly requires historical and demographic data that is beyond the scraped data set.
 
 Despite these limitations, the machine learning approach offers a structured way to compare service conditions across rail lines using reproducible, data-driven methods.
 
-## 6. Github intergretion
+## 6. Workflow & Automation
 
-## 7.
+A reproducible workflow is essential for maintaining transparency, ensuring that results can be verified, and enabling the analysis to be updated easily in the future. Because the CTA System Status & Alerts page changes frequently, especially for rail service conditions, it is important that the full analytically pipeline can be rerun whenever a new HTML file is downloaded.
+
+## 7.Ethics & Fairness Reflection
+
+7.1 Biases and Limitations in the Data set
+
+Several important limitations influence how this data set should be interpreted. First, the scraped rail alert data reflects only a single snapshot in time, rather than ongoing or historical service patterns. Because service conditions change frequently, this one-time view cannot reliably communicate whether certain lines consistently experience delays or disruptions.
+
+Second, CTA service alerts are designed for public-facing communication, not analytically standardization. Different rail lines may receive different levels of detail or frequency of updates, resulting in potential reporting bias. Alerts may also vary in wording, making comparisons across lines difficult.
+
+Third, some rail lines may not appear in the data set at all if no alert happened to be posted at the time of scraping. This means the data set may under represent or misrepresent service reliability for certain communities. Finally, the alerts lack geographic context, demographic information, or time-based details such as duration or frequency of disruptions, limiting the ability to evaluate equity impacts.
+
+7.2 How These Biases Could Affect Decision-Making
+
+If policymakers were to rely solely on this data set, the limitations could lead to incorrect or incomplete conclusions. A temporary disruption might appear to be a systemic issue, or chronic issues might not be visible in the snapshot. Lines serving neighborhoods with fewer posted alerts might appear more reliable even if this is not the case over time.
+
+Because machine learning clustering in this project is based on the limited status categories available, its groupings reflect patterns in the alert text, not comprehensive operational performance. Without a broader data set, these clusters should not be used to guide major decisions about funding, scheduling, or maintenance priorities.
+
+These biases highlight the need to avoid overgeneralizing and to frame any insights as exploratory and preliminary rather than definitive.
+
+7.3 Responsible Presentation of Findings to Policymakers
+
+Findings from this project should be presented to policymakers with clear transparency about data limitations. It is important to emphasize that:
+
+-    The analysis is based on a single snapshot, not long-term performance.
+
+-   Alerts reflect CTA communication choices, not complete operational data.
+
+-    Results should be used to inform further investigation, not to make conclusive judgments.
+
+-    Additional datasets—such as on-time performance logs, slow zone maps, and demographic overlays—would be needed for meaningful equity evaluations.
+
+A responsible presentation would frame the results as a starting point for deeper analysis, encouraging city officials to consider how better data collection, transparency, and reporting standards can improve transit planning and equity assessments.
+
+## Reflection Memo
+
+Overview
+
+This memo summarizes the purpose, approach, findings, and policy implications of the CTA rail service analysis project, written for civic and non-technical audiences such as city officials, nonprofit leaders, and community organizations.
+
+Civic Problem Addressed
+
+Public transit reliability is a vital component of civic equity. When rail service is inconsistent or poorly communicated, communities that rely most on transit—often low-income residents, essential workers, and people without access to cars—face greater barriers to mobility. This project explores publicly available service alerts to understand how CTA rail lines differ in their reported service conditions and how such information might eventually support transit equity discussions.
+
+Steps Taken to Produce Findings
+
+The project involved:
+
+1.   Scraping CTA’s public service alert webpage to collect rail-line status information.
+
+2.   Standardizing service categories into broad groups such as normal service, minor delay, major delay, and service change.
+
+3.   Applying machine learning clustering to identify patterns in how rail lines are described in public alerts.
+
+4.   Visualizing the results to communicate differences in service descriptions across lines.
+
+Although the data set is limited, the workflow demonstrates how civic analysts can use reproducible methods to generate insights from publicly available transit data.
+
+Key Findings
+
+-    Some lines appear more frequently in alert data than others.
+
+-    Service descriptions vary by line, suggesting differences in either operational reliability or communication frequency.
+
+-    Machine learning grouped several lines together based on similarities in their reported service categories.
+
+-    Because the data set is a single snapshot, these findings should not be interpreted as long-term performance trends.
+
+Equity and Fairness Concerns
+
+The analysis raises several equity considerations:
+
+-    Missing or inconsistent alerts may underrepresent service challenges faced by certain communities.
+
+-    Snapshot-based conclusions could obscure chronic issues or exaggerate temporary disruptions.
+
+-    Without demographic or geographic context, it is not possible to determine whether transit burdens fall disproportionately on specific neighborhoods.
+
+-    The language used in service alerts may itself be a source of bias.
+
+These factors underscore the need for richer, longitudinal, and more transparent transit data.
+
+Policy Implications
+
+While exploratory, the findings support several potential policy directions:
+
+-    Improved data transparency: CTA could publish standardized, historical performance metrics to support evidence-based decision-making.
+
+-    Enhanced communication consistency: Standardizing alert wording would assist both the public and analysts in interpreting service conditions.
+
+-    Equity-centered planning: Future analyses should integrate demographic data to ensure that transit investment decisions promote fairness.
+
+-    Predictive analytics opportunities: With a broader data set, machine learning could help anticipate rail-line disruptions and improve rider experience.
