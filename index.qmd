@@ -478,7 +478,7 @@ Equity and Fairness Concerns
 
 The analysis raises several equity considerations:
 
--   Missing or inconsistent alerts may underrepresent service challenges faced by certain communities.
+-   Missing or inconsistent alerts may under represent service challenges faced by certain communities.
 
 -   Snapshot-based conclusions could obscure chronic issues or exaggerate temporary disruptions.
 
