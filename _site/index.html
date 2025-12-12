@@ -146,7 +146,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./about.html"> 
-<span class="menu-text">About</span></a>
+<span class="menu-text">About This Project</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -169,8 +169,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data-wrangling-and-quality-evaluation" id="toc-data-wrangling-and-quality-evaluation" class="nav-link" data-scroll-target="#data-wrangling-and-quality-evaluation">3. Data Wrangling and Quality Evaluation</a></li>
   <li><a href="#reproducible-reporting" id="toc-reproducible-reporting" class="nav-link" data-scroll-target="#reproducible-reporting">4. Reproducible Reporting</a></li>
   <li><a href="#advanced-analysis-clustering-rail-lines-using-machine-learning" id="toc-advanced-analysis-clustering-rail-lines-using-machine-learning" class="nav-link" data-scroll-target="#advanced-analysis-clustering-rail-lines-using-machine-learning">5. Advanced Analysis: Clustering Rail Lines Using Machine Learning</a></li>
-  <li><a href="#github-intergretion" id="toc-github-intergretion" class="nav-link" data-scroll-target="#github-intergretion">6. Github intergretion</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section">7.</a></li>
+  <li><a href="#workflow-automation" id="toc-workflow-automation" class="nav-link" data-scroll-target="#workflow-automation">6. Workflow &amp; Automation</a></li>
+  <li><a href="#ethics-fairness-reflection" id="toc-ethics-fairness-reflection" class="nav-link" data-scroll-target="#ethics-fairness-reflection">7.Ethics &amp; Fairness Reflection</a></li>
+  <li><a href="#reflection-memo" id="toc-reflection-memo" class="nav-link" data-scroll-target="#reflection-memo">Reflection Memo</a></li>
   </ul>
 </nav>
     </div>
@@ -203,7 +204,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="data-acquisition" class="level2">
 <h2 class="anchored" data-anchor-id="data-acquisition">2. Data Acquisition</h2>
 <p>To obtain rail system alert data from the Chicago Transit Authority (CTA), I used a web scraping approach. The CTA publishes system status and alerts on its website, but the site blocks automated web requests from R. Because of this, direct scraping from the live URL was not possible.</p>
-<p>To preserve the web scraping method while avoiding server restrictions, I downloaded the full HTML of the CTA System Status &amp; Alerts page using a standard web browser. I then used the rvest package in R to parse and extract structured rail alert information directly from the saved HTML file. This method still demonstrates the core principles of web scraping: navigating HTML structure, selecting elements with CSS selectors, and transforming the extracted content into a usable dataset.</p>
+<p>To preserve the web scraping method while avoiding server restrictions, I downloaded the full HTML of the CTA System Status &amp; Alerts page using a standard web browser. I then used the rvest package in R to parse and extract structured rail alert information directly from the saved HTML file. This method still demonstrates the core principles of web scraping: navigating HTML structure, selecting elements with CSS selectors, and transforming the extracted content into a usable data set.</p>
 <p>Web scrapping</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
@@ -253,12 +254,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 8 rail  Yellow Line https://www.transitchicago.com/yellowline/ Normal Service</code></pre>
 </div>
 </div>
-<p>The scraped dataset will serve as the foundation for subsequent steps, including data cleaning, visualization, and the analysis of how rail conditions vary across Chicago’s neighborhoods and populations.</p>
+<p>The scraped data set will serve as the foundation for subsequent steps, including data cleaning, visualization, and the analysis of how rail conditions vary across Chicago’s neighborhoods and populations.</p>
 </section>
 <section id="data-wrangling-and-quality-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="data-wrangling-and-quality-evaluation">3. Data Wrangling and Quality Evaluation</h2>
-<p>After scraping the rail alerts from the CTA System Status &amp; Alerts page, I performed a series of wrangling steps to prepare the data set for analysis. The raw scraped data included the rail line name, a hyperlink to CTA’s route page, and a status description for each rail line. Although the data set is relatively small, it still required cleaning and structuring to ensure consistency and analytical usefulness.</p>
-<p>First, I standardized variable names, trimmed whitespace, and removed any non-informative rows. I then extracted key components of the service status, such as distinguishing between “Normal Service,” “Minor Delays,” and other operational statuses. Standardizing these values enables more reliable grouping and comparison across rail lines.</p>
+<p>After scraping the rail alerts from the CTA System Status &amp; Alerts page, I performed a series of wrangling steps to prepare the data set for analysis. The raw scraped data included the rail line name, a hyperlink to CTA’s route page, and a status description for each rail line. Although the data set is relatively small, it still required cleaning and structuring to ensure consistency and analytically usefulness.</p>
+<p>First, I standardized variable names, trimmed white space, and removed any non-informative rows. I then extracted key components of the service status, such as distinguishing between “Normal Service,” “Minor Delays,” and other operational statuses. Standardizing these values enables more reliable grouping and comparison across rail lines.</p>
 <p>Next, I evaluated data quality issues that commonly arise in scraped data. These included inconsistent status wording across lines, potential missing values, and whether the hyperlink fields were complete. Although the CTA’s website provides a structured table, the text content is not fully standardized, so additional transformation was needed to categorize alerts into meaningful groups.</p>
 <p>From an equity and fairness perspective, it was important to assess whether the data was complete and representative of the full CTA rail network. I checked whether all major rail lines appeared in the data set and whether any had missing or ambiguous service status fields. Missing values or incomplete alerts could bias subsequent analysis of transit reliability. These checks help ensure that the data set is suitable for exploring how service quality may differ across communities served by different rail lines.</p>
 <p>The cleaned data set resulting from this step provides a structured, consistent input for visualization and analysis in later sections.</p>
@@ -382,10 +383,10 @@ $ status_cat   &lt;chr&gt; "normal", "unknown", "normal", "unknown", "normal", "
 <p>3.6 Fairness and Data Quality Considerations</p>
 <p>Several equity and quality issues emerged during the wrangling process:</p>
 <ul>
-<li><p><strong>Missing Lines:</strong> Not all rail lines appear in the scraped table. This may reflect real conditions (e.g., a line experiencing no service alerts), but it still introduces the possibility of missing data that affects representativeness.</p></li>
-<li><p><strong>Status Description Variability:</strong> CTA uses inconsistent wording for service conditions. The decisions made during standardization may influence downstream comparisons, and these transformations introduce subjective interpretation.</p></li>
-<li><p><strong>Snapshot Bias:</strong> The scraped HTML represents a single moment in time rather than a historical data set. Service reliability varies by time of day and day of week, so this snapshot may not fully represent overall performance.</p></li>
-<li><p><strong>Equity Relevance:</strong> If certain lines—especially those serving predominantly low-income or marginalized neighborhoods—show more frequent or more severe alerts, these patterns must be interpreted carefully. Data limitations and website structure constrain the conclusions that can be drawn.</p></li>
+<li><p>Missing Lines: Not all rail lines appear in the scraped table. This may reflect real conditions (e.g., a line experiencing no service alerts), but it still introduces the possibility of missing data that affects representativeness.</p></li>
+<li><p>Status Description Variability: CTA uses inconsistent wording for service conditions. The decisions made during standardization may influence downstream comparisons, and these transformations introduce subjective interpretation.</p></li>
+<li><p>Snapshot Bias: The scraped HTML represents a single moment in time rather than a historical data set. Service reliability varies by time of day and day of week, so this snapshot may not fully represent overall performance.</p></li>
+<li><p>Equity Relevance: If certain lines—especially those serving predominantly low-income or marginalized neighborhoods—show more frequent or more severe alerts, these patterns must be interpreted carefully. Data limitations and website structure constrain the conclusions that can be drawn.</p></li>
 </ul>
 <p>Overall, the data set is clean and structured enough to support exploratory visualization and analytically work in subsequent sections, but the limitations above should be considered when interpreting results.</p>
 </section>
@@ -443,7 +444,7 @@ $ status_cat   &lt;chr&gt; "normal", "unknown", "normal", "unknown", "normal", "
 </div>
 </div>
 <p>4.3 Visualization 3: Rail Lines Appearing in Alerts</p>
-<p>This chart helps identify rail lines that may be missing, overrepresented, or behaving differently in terms of alert frequency.</p>
+<p>This chart helps identify rail lines that may be missing, over represented, or behaving differently in terms of alert frequency.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rail_clean <span class="sc">|&gt;</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(route, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
@@ -465,7 +466,7 @@ $ status_cat   &lt;chr&gt; "normal", "unknown", "normal", "unknown", "normal", "
 </div>
 </div>
 <p>4.4 Interactive Visualization</p>
-<p>This interactive bar chart uses <strong>plotly</strong>, allowing the user to hover over rail lines for details. Interactive components satisfy the Quarto project requirement.</p>
+<p>This interactive bar chart uses plotly, allowing the user to hover over rail lines for details. Interactive components satisfy the Quarto project requirement.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(plotly)})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -494,8 +495,8 @@ $ status_cat   &lt;chr&gt; "normal", "unknown", "normal", "unknown", "normal", "
 <span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-658662b5bb4fcec95982" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-658662b5bb4fcec95982">{"x":{"visdat":{"469c520a704a":["function () ","plotlyVisDat"]},"cur_data":"469c520a704a","attrs":{"469c520a704a":{"x":{},"y":{},"hoverinfo":"text","text":{},"color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Interactive CTA Rail Status Summary","xaxis":{"domain":[0,1],"automargin":true,"title":"Rail Line","type":"category","categoryorder":"array","categoryarray":["Blue Line","Brown Line","Green Line","Orange Line","Pink Line","Purple Line","Red Line","Yellow Line"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Count"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Brown Line","Orange Line","Pink Line","Purple Line","Red Line","Yellow Line"],"y":[1,1,1,1,1,1],"hoverinfo":["text","text","text","text","text","text"],"text":["Route: Brown Line <br>Status Category: normal <br>Count: 1","Route: Orange Line <br>Status Category: normal <br>Count: 1","Route: Pink Line <br>Status Category: normal <br>Count: 1","Route: Purple Line <br>Status Category: normal <br>Count: 1","Route: Red Line <br>Status Category: normal <br>Count: 1","Route: Yellow Line <br>Status Category: normal <br>Count: 1"],"type":"bar","name":"normal","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Blue Line","Green Line"],"y":[1,1],"hoverinfo":["text","text"],"text":["Route: Blue Line <br>Status Category: unknown <br>Count: 1","Route: Green Line <br>Status Category: unknown <br>Count: 1"],"type":"bar","name":"unknown","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-8ede64325a467e891bcd" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-8ede64325a467e891bcd">{"x":{"visdat":{"17f0b834e12":["function () ","plotlyVisDat"]},"cur_data":"17f0b834e12","attrs":{"17f0b834e12":{"x":{},"y":{},"hoverinfo":"text","text":{},"color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Interactive CTA Rail Status Summary","xaxis":{"domain":[0,1],"automargin":true,"title":"Rail Line","type":"category","categoryorder":"array","categoryarray":["Blue Line","Brown Line","Green Line","Orange Line","Pink Line","Purple Line","Red Line","Yellow Line"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Count"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Brown Line","Orange Line","Pink Line","Purple Line","Red Line","Yellow Line"],"y":[1,1,1,1,1,1],"hoverinfo":["text","text","text","text","text","text"],"text":["Route: Brown Line <br>Status Category: normal <br>Count: 1","Route: Orange Line <br>Status Category: normal <br>Count: 1","Route: Pink Line <br>Status Category: normal <br>Count: 1","Route: Purple Line <br>Status Category: normal <br>Count: 1","Route: Red Line <br>Status Category: normal <br>Count: 1","Route: Yellow Line <br>Status Category: normal <br>Count: 1"],"type":"bar","name":"normal","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Blue Line","Green Line"],"y":[1,1],"hoverinfo":["text","text"],"text":["Route: Blue Line <br>Status Category: unknown <br>Count: 1","Route: Green Line <br>Status Category: unknown <br>Count: 1"],"type":"bar","name":"unknown","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p>4.5 Reproducibility Notes</p>
@@ -541,7 +542,7 @@ $ status_cat   &lt;chr&gt; "normal", "unknown", "normal", "unknown", "normal", "
 <p>This produces a table where each row is a rail line and each column is the count of alerts in a particular category</p>
 <p>5.2 Running K-Means Clustering</p>
 <p>Because k-means requires the number of clusters to be no greater than the number of distinct feature profiles, I set the number of clusters to:</p>
-<p><strong>min(3, number of distinct feature patterns)</strong></p>
+<p>min(3, number of distinct feature patterns)</p>
 <p>This prevents errors and ensures meaningful clusters.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>feature_matrix <span class="ot">&lt;-</span> rail_features <span class="sc">|&gt;</span></span>
@@ -673,18 +674,76 @@ $ status_cat   &lt;chr&gt; "normal", "unknown", "normal", "unknown", "normal", "
 </ul>
 <p>5.6 Fairness and Limitations</p>
 <ul>
-<li><p><strong>Snapshot bias:</strong> The analysis reflects conditions only for the moment the HTML was scraped, not long-term performance.</p></li>
-<li><p><strong>Small data set:</strong> With limited alerts and a small number of rail lines, clusters should be interpreted cautiously.</p></li>
-<li><p><strong>Reporting bias:</strong> CTA’s website communicates certain alerts differently across lines. Differences in reporting may influence clusters.</p></li>
-<li><p><strong>Equity implications:</strong> Lines serving marginalized communities could appear more frequently in “disrupted” clusters—however, drawing these conclusions responsibly requires historical and demographic data that is beyond the scraped data set.</p></li>
+<li><p>Snapshot bias: The analysis reflects conditions only for the moment the HTML was scraped, not long-term performance.</p></li>
+<li><p>Small data set: With limited alerts and a small number of rail lines, clusters should be interpreted cautiously.</p></li>
+<li><p>Reporting bias: CTA’s website communicates certain alerts differently across lines. Differences in reporting may influence clusters.</p></li>
+<li><p>Equity implications: Lines serving marginalized communities could appear more frequently in “disrupted” clusters—however, drawing these conclusions responsibly requires historical and demographic data that is beyond the scraped data set.</p></li>
 </ul>
 <p>Despite these limitations, the machine learning approach offers a structured way to compare service conditions across rail lines using reproducible, data-driven methods.</p>
 </section>
-<section id="github-intergretion" class="level2">
-<h2 class="anchored" data-anchor-id="github-intergretion">6. Github intergretion</h2>
+<section id="workflow-automation" class="level2">
+<h2 class="anchored" data-anchor-id="workflow-automation">6. Workflow &amp; Automation</h2>
+<p>A reproducible workflow is essential for maintaining transparency, ensuring that results can be verified, and enabling the analysis to be updated easily in the future. Because the CTA System Status &amp; Alerts page changes frequently, especially for rail service conditions, it is important that the full analytically pipeline can be rerun whenever a new HTML file is downloaded.</p>
 </section>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section">7.</h2>
+<section id="ethics-fairness-reflection" class="level2">
+<h2 class="anchored" data-anchor-id="ethics-fairness-reflection">7.Ethics &amp; Fairness Reflection</h2>
+<p>7.1 Biases and Limitations in the Data set</p>
+<p>Several important limitations influence how this data set should be interpreted. First, the scraped rail alert data reflects only a single snapshot in time, rather than ongoing or historical service patterns. Because service conditions change frequently, this one-time view cannot reliably communicate whether certain lines consistently experience delays or disruptions.</p>
+<p>Second, CTA service alerts are designed for public-facing communication, not analytically standardization. Different rail lines may receive different levels of detail or frequency of updates, resulting in potential reporting bias. Alerts may also vary in wording, making comparisons across lines difficult.</p>
+<p>Third, some rail lines may not appear in the data set at all if no alert happened to be posted at the time of scraping. This means the data set may under represent or misrepresent service reliability for certain communities. Finally, the alerts lack geographic context, demographic information, or time-based details such as duration or frequency of disruptions, limiting the ability to evaluate equity impacts.</p>
+<p>7.2 How These Biases Could Affect Decision-Making</p>
+<p>If policymakers were to rely solely on this data set, the limitations could lead to incorrect or incomplete conclusions. A temporary disruption might appear to be a systemic issue, or chronic issues might not be visible in the snapshot. Lines serving neighborhoods with fewer posted alerts might appear more reliable even if this is not the case over time.</p>
+<p>Because machine learning clustering in this project is based on the limited status categories available, its groupings reflect patterns in the alert text, not comprehensive operational performance. Without a broader data set, these clusters should not be used to guide major decisions about funding, scheduling, or maintenance priorities.</p>
+<p>These biases highlight the need to avoid overgeneralizing and to frame any insights as exploratory and preliminary rather than definitive.</p>
+<p>7.3 Responsible Presentation of Findings to Policymakers</p>
+<p>Findings from this project should be presented to policymakers with clear transparency about data limitations. It is important to emphasize that:</p>
+<ul>
+<li><p>The analysis is based on a single snapshot, not long-term performance.</p></li>
+<li><p>Alerts reflect CTA communication choices, not complete operational data.</p></li>
+<li><p>Results should be used to inform further investigation, not to make conclusive judgments.</p></li>
+<li><p>Additional datasets—such as on-time performance logs, slow zone maps, and demographic overlays—would be needed for meaningful equity evaluations.</p></li>
+</ul>
+<p>A responsible presentation would frame the results as a starting point for deeper analysis, encouraging city officials to consider how better data collection, transparency, and reporting standards can improve transit planning and equity assessments.</p>
+</section>
+<section id="reflection-memo" class="level2">
+<h2 class="anchored" data-anchor-id="reflection-memo">Reflection Memo</h2>
+<p>Overview</p>
+<p>This memo summarizes the purpose, approach, findings, and policy implications of the CTA rail service analysis project, written for civic and non-technical audiences such as city officials, nonprofit leaders, and community organizations.</p>
+<p>Civic Problem Addressed</p>
+<p>Public transit reliability is a vital component of civic equity. When rail service is inconsistent or poorly communicated, communities that rely most on transit—often low-income residents, essential workers, and people without access to cars—face greater barriers to mobility. This project explores publicly available service alerts to understand how CTA rail lines differ in their reported service conditions and how such information might eventually support transit equity discussions.</p>
+<p>Steps Taken to Produce Findings</p>
+<p>The project involved:</p>
+<ol type="1">
+<li><p>Scraping CTA’s public service alert webpage to collect rail-line status information.</p></li>
+<li><p>Standardizing service categories into broad groups such as normal service, minor delay, major delay, and service change.</p></li>
+<li><p>Applying machine learning clustering to identify patterns in how rail lines are described in public alerts.</p></li>
+<li><p>Visualizing the results to communicate differences in service descriptions across lines.</p></li>
+</ol>
+<p>Although the data set is limited, the workflow demonstrates how civic analysts can use reproducible methods to generate insights from publicly available transit data.</p>
+<p>Key Findings</p>
+<ul>
+<li><p>Some lines appear more frequently in alert data than others.</p></li>
+<li><p>Service descriptions vary by line, suggesting differences in either operational reliability or communication frequency.</p></li>
+<li><p>Machine learning grouped several lines together based on similarities in their reported service categories.</p></li>
+<li><p>Because the data set is a single snapshot, these findings should not be interpreted as long-term performance trends.</p></li>
+</ul>
+<p>Equity and Fairness Concerns</p>
+<p>The analysis raises several equity considerations:</p>
+<ul>
+<li><p>Missing or inconsistent alerts may underrepresent service challenges faced by certain communities.</p></li>
+<li><p>Snapshot-based conclusions could obscure chronic issues or exaggerate temporary disruptions.</p></li>
+<li><p>Without demographic or geographic context, it is not possible to determine whether transit burdens fall disproportionately on specific neighborhoods.</p></li>
+<li><p>The language used in service alerts may itself be a source of bias.</p></li>
+</ul>
+<p>These factors underscore the need for richer, longitudinal, and more transparent transit data.</p>
+<p>Policy Implications</p>
+<p>While exploratory, the findings support several potential policy directions:</p>
+<ul>
+<li><p>Improved data transparency: CTA could publish standardized, historical performance metrics to support evidence-based decision-making.</p></li>
+<li><p>Enhanced communication consistency: Standardizing alert wording would assist both the public and analysts in interpreting service conditions.</p></li>
+<li><p>Equity-centered planning: Future analyses should integrate demographic data to ensure that transit investment decisions promote fairness.</p></li>
+<li><p>Predictive analytics opportunities: With a broader data set, machine learning could help anticipate rail-line disruptions and improve rider experience.</p></li>
+</ul>
 
 
 </section>

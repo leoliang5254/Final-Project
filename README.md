@@ -1,8 +1,3 @@
----
-title: "About This Project"
-format: html
----
-
 ## About This Project
 
 This Quarto site presents a reproducible data analysis project examining CTA rail service conditions in Chicago. The goal of the project is to explore how public transit service reliability is communicated through CTA’s system alerts and to demonstrate how data science methods can support conversations about transit equity, operational planning, and transparency.

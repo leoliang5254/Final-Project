@@ -430,13 +430,13 @@ These biases highlight the need to avoid overgeneralizing and to frame any insig
 
 Findings from this project should be presented to policymakers with clear transparency about data limitations. It is important to emphasize that:
 
--    The analysis is based on a single snapshot, not long-term performance.
+-   The analysis is based on a single snapshot, not long-term performance.
 
 -   Alerts reflect CTA communication choices, not complete operational data.
 
--    Results should be used to inform further investigation, not to make conclusive judgments.
+-   Results should be used to inform further investigation, not to make conclusive judgments.
 
--    Additional datasets—such as on-time performance logs, slow zone maps, and demographic overlays—would be needed for meaningful equity evaluations.
+-   Additional datasets—such as on-time performance logs, slow zone maps, and demographic overlays—would be needed for meaningful equity evaluations.
 
 A responsible presentation would frame the results as a starting point for deeper analysis, encouraging city officials to consider how better data collection, transparency, and reporting standards can improve transit planning and equity assessments.
 
@@ -454,37 +454,37 @@ Steps Taken to Produce Findings
 
 The project involved:
 
-1.   Scraping CTA’s public service alert webpage to collect rail-line status information.
+1.  Scraping CTA’s public service alert webpage to collect rail-line status information.
 
-2.   Standardizing service categories into broad groups such as normal service, minor delay, major delay, and service change.
+2.  Standardizing service categories into broad groups such as normal service, minor delay, major delay, and service change.
 
-3.   Applying machine learning clustering to identify patterns in how rail lines are described in public alerts.
+3.  Applying machine learning clustering to identify patterns in how rail lines are described in public alerts.
 
-4.   Visualizing the results to communicate differences in service descriptions across lines.
+4.  Visualizing the results to communicate differences in service descriptions across lines.
 
 Although the data set is limited, the workflow demonstrates how civic analysts can use reproducible methods to generate insights from publicly available transit data.
 
 Key Findings
 
--    Some lines appear more frequently in alert data than others.
+-   Some lines appear more frequently in alert data than others.
 
--    Service descriptions vary by line, suggesting differences in either operational reliability or communication frequency.
+-   Service descriptions vary by line, suggesting differences in either operational reliability or communication frequency.
 
--    Machine learning grouped several lines together based on similarities in their reported service categories.
+-   Machine learning grouped several lines together based on similarities in their reported service categories.
 
--    Because the data set is a single snapshot, these findings should not be interpreted as long-term performance trends.
+-   Because the data set is a single snapshot, these findings should not be interpreted as long-term performance trends.
 
 Equity and Fairness Concerns
 
 The analysis raises several equity considerations:
 
--    Missing or inconsistent alerts may underrepresent service challenges faced by certain communities.
+-   Missing or inconsistent alerts may underrepresent service challenges faced by certain communities.
 
--    Snapshot-based conclusions could obscure chronic issues or exaggerate temporary disruptions.
+-   Snapshot-based conclusions could obscure chronic issues or exaggerate temporary disruptions.
 
--    Without demographic or geographic context, it is not possible to determine whether transit burdens fall disproportionately on specific neighborhoods.
+-   Without demographic or geographic context, it is not possible to determine whether transit burdens fall disproportionately on specific neighborhoods.
 
--    The language used in service alerts may itself be a source of bias.
+-   The language used in service alerts may itself be a source of bias.
 
 These factors underscore the need for richer, longitudinal, and more transparent transit data.
 
@@ -492,10 +492,10 @@ Policy Implications
 
 While exploratory, the findings support several potential policy directions:
 
--    Improved data transparency: CTA could publish standardized, historical performance metrics to support evidence-based decision-making.
+-   Improved data transparency: CTA could publish standardized, historical performance metrics to support evidence-based decision-making.
 
--    Enhanced communication consistency: Standardizing alert wording would assist both the public and analysts in interpreting service conditions.
+-   Enhanced communication consistency: Standardizing alert wording would assist both the public and analysts in interpreting service conditions.
 
--    Equity-centered planning: Future analyses should integrate demographic data to ensure that transit investment decisions promote fairness.
+-   Equity-centered planning: Future analyses should integrate demographic data to ensure that transit investment decisions promote fairness.
 
--    Predictive analytics opportunities: With a broader data set, machine learning could help anticipate rail-line disruptions and improve rider experience.
+-   Predictive analytics opportunities: With a broader data set, machine learning could help anticipate rail-line disruptions and improve rider experience.

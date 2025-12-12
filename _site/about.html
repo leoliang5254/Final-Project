@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>About – Final Project</title>
+<title>About This Project – Final Project</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,40 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -128,7 +94,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./about.html" aria-current="page"> 
-<span class="menu-text">About</span></a>
+<span class="menu-text">About This Project</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -141,15 +107,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#about-this-project" id="toc-about-this-project" class="nav-link active" data-scroll-target="#about-this-project">About This Project</a></li>
+  <li><a href="#why-transit-equity-matters" id="toc-why-transit-equity-matters" class="nav-link" data-scroll-target="#why-transit-equity-matters">Why Transit Equity Matters</a></li>
+  <li><a href="#what-this-site-includes" id="toc-what-this-site-includes" class="nav-link" data-scroll-target="#what-this-site-includes">What This Site Includes</a></li>
+  <li><a href="#reproducibility-and-transparency" id="toc-reproducibility-and-transparency" class="nav-link" data-scroll-target="#reproducibility-and-transparency">Reproducibility and Transparency</a></li>
+  <li><a href="#who-this-project-is-for" id="toc-who-this-project-is-for" class="nav-link" data-scroll-target="#who-this-project-is-for">Who This Project Is For</a></li>
+  <li><a href="#acknowledgments" id="toc-acknowledgments" class="nav-link" data-scroll-target="#acknowledgments">Acknowledgments</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">About</h1>
+<h1 class="title">About This Project</h1>
 </div>
 
 
@@ -166,15 +143,82 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>About this site</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
-</div>
-</div>
+<section id="about-this-project" class="level2">
+<h2 class="anchored" data-anchor-id="about-this-project">About This Project</h2>
+<p>This Quarto site presents a reproducible data analysis project examining CTA rail service conditions in Chicago. The goal of the project is to explore how public transit service reliability is communicated through CTA’s system alerts and to demonstrate how data science methods can support conversations about transit equity, operational planning, and transparency.</p>
+<p>The project uses publicly available information from CTA’s “System Status &amp; Alerts” webpage. The data was collected through web scraping, cleaned and categorized into meaningful service status types, and then analyzed using exploratory machine learning techniques. Although the dataset represents only a single point in time, the workflow highlights how civic analysts, students, and public agencies can use reproducible tools to better understand transit service patterns.</p>
+<hr>
+</section>
+<section id="why-transit-equity-matters" class="level2">
+<h2 class="anchored" data-anchor-id="why-transit-equity-matters">Why Transit Equity Matters</h2>
+<p>Reliable public transportation is essential for equitable access to jobs, education, healthcare, and civic participation. In Chicago, many residents depend heavily on CTA rail service, and disruptions often disproportionately affect communities with fewer transportation alternatives.</p>
+<p>This project focuses on the question:</p>
+<p><strong>How do CTA rail service alerts reflect differences in service conditions across rail lines, and what might these patterns suggest for transit equity and public communication?</strong></p>
+<p>While the results are exploratory, they demonstrate how data-driven frameworks can support policy discussions around transportation equity, infrastructure investment, and public accountability.</p>
+<hr>
+</section>
+<section id="what-this-site-includes" class="level2">
+<h2 class="anchored" data-anchor-id="what-this-site-includes">What This Site Includes</h2>
+<p>This site contains:</p>
+<ul>
+<li><strong>Data acquisition and scraping</strong> steps showing how CTA service alerts were collected<br>
+</li>
+<li><strong>Data cleaning and wrangling</strong> using reproducible R workflows<br>
+</li>
+<li><strong>Visualizations</strong> summarizing rail status conditions<br>
+</li>
+<li><strong>A machine learning analysis</strong> that groups rail lines based on alert patterns<br>
+</li>
+<li><strong>Ethics and fairness reflections</strong> discussing limitations and policy implications<br>
+</li>
+<li><strong>A reproducible pipeline</strong> demonstrating how Quarto, R scripts, and structured workflows can support transparent civic analytics</li>
+</ul>
+<p>Each section is designed to be readable and self-contained so that others can retrace the workflow or extend it with additional data.</p>
+<hr>
+</section>
+<section id="reproducibility-and-transparency" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility-and-transparency">Reproducibility and Transparency</h2>
+<p>This project emphasizes:</p>
+<ul>
+<li>Clear file organization<br>
+</li>
+<li>Modular scripts<br>
+</li>
+<li>Parameterized Quarto reports<br>
+</li>
+<li>Automated rendering for updating results<br>
+</li>
+<li>Versioning of changes through Git/GitHub (optional but recommended)</li>
+</ul>
+<p>The entire workflow can be rerun with a new CTA HTML alert file, allowing the analysis to stay synchronized with current service information.</p>
+<hr>
+</section>
+<section id="who-this-project-is-for" class="level2">
+<h2 class="anchored" data-anchor-id="who-this-project-is-for">Who This Project Is For</h2>
+<p>This project is intended for:</p>
+<ul>
+<li>Students and researchers in civic analytics<br>
+</li>
+<li>Transit planners and transportation advocates<br>
+</li>
+<li>City officials and nonprofit leaders<br>
+</li>
+<li>Anyone interested in Chicago’s transit system and open data<br>
+</li>
+<li>Community members curious about how data can inform public decision-making</li>
+</ul>
+<p>By making the process reproducible and accessible, the project aims to support a more transparent and data-literate conversation about public transit equity in Chicago.</p>
+<hr>
+</section>
+<section id="acknowledgments" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
+<p>This project was completed as part of the PA 446 course at the University of Illinois Chicago, with guidance on reproducible workflows, data ethics, and public-sector data management. CTA data used in this analysis was accessed through the publicly available system alerts published on transitchicago.com.</p>
+<hr>
+<p>If you’d like to explore the analysis or adapt the workflow, feel free to browse the sections in the sidebar and rerun the code on your own system.</p>
+<p>```markdown</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
