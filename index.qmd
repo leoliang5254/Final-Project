@@ -1,5 +1,6 @@
 ---
 title: "Final Project"
+format: html
 ---
 
 ## 1. Transit access and equity
